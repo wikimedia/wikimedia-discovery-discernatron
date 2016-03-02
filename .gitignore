@@ -1,0 +1,9 @@
+vendor/
+.*.sw?
+/app.db
+/app.ini
+/public/vendor/bootstrap
+/composer.lock
+/cache
+/.vagrant
+/.idea

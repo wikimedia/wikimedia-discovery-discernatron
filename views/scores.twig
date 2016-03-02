@@ -1,0 +1,27 @@
+{% extends "layout.twig" %}
+
+{% block content %}
+    <h3>Scores</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <td>wiki</td>
+                <td>query</td>
+                <td>title</td>
+                <td>score</td>
+                <td>num scores</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for score in scores %}
+                <tr>
+                    <td>{{ score.wiki }}</td>
+                    <td>{{ score.query }}</td>
+                    <td>{{ score.title }}</td>
+                    <td>{{ score.score }}</td>
+                    <td>{{ score.num_scores }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

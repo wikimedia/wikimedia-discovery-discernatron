@@ -1,0 +1,114 @@
+{% extends "layout.twig" %}
+
+{% form_theme form _self %}
+
+{% block choice_label %}
+    {# no label, our form will just use buttons #}
+{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+    <style type="text/css">
+        .row.relevant {
+            background-color: #C8F526;
+        }
+        .row.probably {
+            background-color: #DAB82E;
+        }
+        .row.maybe {
+            background-color: #EC7C37;
+        }
+        .row.irrelevant {
+            background-color: #FF4040;
+        }
+        @media (max-width: 768px) {
+            .border-xs {
+                border: 1px solid black;
+            } 
+        }
+        @media (max-width: 991px) and (min-width: 768px) {
+            .border-sm {
+                border: 1px solid black;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% if saved %}
+        <p class="bg-success">Saved score for query</p>
+    {% endif %}
+
+    <h3>Score Result</h3>
+    <div>
+        <dl class="dl-horizontal">
+            <dt>Wiki</dt>
+            <dd>{{ query.wiki }}</dd>
+            <dt>Query</dt>
+            <dd>{{ query.query }}</dd>
+        </dl>
+    </div>
+
+    <form method="post" novalidate>
+        {{ form_errors(form) }}
+        {{ form_row(form._token) }}
+
+        {% for child in form %}
+            <div class="row border-xs border-sm">
+                <div class="click-for-next col-md-3">{{ child.vars.label }}</div>
+                {% for choice in child %}
+                    <div class="col-md-2 hidden-xs hidden-sm click-for-next">
+                        {{ form_label(choice) }}
+                        {{ form_widget(choice) }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        <div class="row">
+            <input type="submit" class="btn btn-default" />
+        </div>
+    </form>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script>
+        var valueToClass = ['relevant', 'probably', 'maybe', 'irrelevant'],
+            onChange = function () {
+                var $this = $(this),
+                    value = parseInt($this.val()),
+                    $row = $this.closest('.row');
+                
+                $row.removeClass(valueToClass.join(' '));
+                if (!isNaN(value)) {
+                    $row.addClass(valueToClass[value]);
+                }
+            };
+
+        $('input[type=radio]').change(onChange);
+        $('.click-for-next').click(function (evt) {
+            // Find the currently selected choice
+            var next,
+                row = $(this).closest('.row'),
+                selected = parseInt(row.find('input:checked').val());
+
+            // Don't override real clicks
+            if ($(evt.toElement).is('label, input')) {
+                return;
+            }
+
+            // if nothing selected default to last so we wrap to beginning
+            if (isNaN(selected)) {
+                selected = 4;
+            }
+            next = (selected + 1) % 5;
+            if (next == 4) {
+                // non existent value means unselect
+                row.find('input:checked').prop('checked', false);
+                onChange.apply(row);
+            } else {
+                onChange.apply(row.find('input[value=' + (next) + ']').prop('checked', true));
+            }
+        });
+    </script>
+{% endblock %}

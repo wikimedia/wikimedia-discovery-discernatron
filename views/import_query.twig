@@ -1,0 +1,17 @@
+{% extends "layout.twig" %}
+
+{% block content %}
+    {% if saved %}
+        <h3>Query has been marked for import. It will be processed at a later time.</h3>
+    {% endif %}
+
+	{% if failure %}
+		<h3>{{ failure }}</h3>    
+	{% endif %}
+
+    <form action='{{ path('import_query') }}' method="post">
+        <h1>Import from search query</h1>
+        {{ form_widget(form) }}
+        <input type="submit" name="submit" />
+    </form>
+{% endblock %}

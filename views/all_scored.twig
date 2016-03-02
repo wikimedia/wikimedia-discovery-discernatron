@@ -1,0 +1,11 @@
+{% extends "layout.twig" %}
+
+{% block content %}
+    {% if saved is defined %}
+        <p class="bg-success">Saved score for query</p>
+    {% endif %}
+
+    <h3>Score Result</h3>
+    <p>All available results have been scored. Thanks!</p>
+    <p>You can <a href="{{ path('import_query') }}">import queries</a> to have new results to score</p>
+{% endblock %}
