@@ -34,13 +34,6 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
         $controllers->match('/import/query', 'search.controller.import:importQuery')
             ->bind('import_query');
 
-        $controllers->get('/result',             'search.controller.results:randomResult')
-            ->bind('random_result');
-        $controllers->get('/result/wiki/{wiki}', 'search.controller.results:randomResult')
-            ->bind('random_result_by_wiki');
-        $controllers->match('/result/id/{id}',   'search.controller.results:getById')
-            ->bind('result_by_id');
-
         $controllers->get('/scores', 'search.controller.scores:scores')
             ->bind('scores');
 
@@ -212,16 +205,6 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
             return new ScoresController(
                 $app,
                 $app['twig'],
-                $app['search.repository.scores']
-            );
-        };
-        $app['search.controller.results'] = function () use ($app) {
-            return new ResultsController(
-                $app,
-                $app['session']->get('user'),
-                $app['twig'],
-                $app['form.factory'],
-                $app['search.repository.results'],
                 $app['search.repository.scores']
             );
         };

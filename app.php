@@ -18,7 +18,7 @@ $app->register(new Silex\Provider\ServiceControllerServiceProvider());
 $oauthProvider = new WikiMedia\OAuth\OAuthProvider();
 $app->register($oauthProvider, [
     'oauth.callback_uri' => 'oob',
-    'oauth.login_complete_redirect' => 'random_result',
+    'oauth.login_complete_redirect' => 'random_query',
 ]);
 $app->mount('/oauth', $oauthProvider);
 
@@ -123,7 +123,7 @@ $app->before(function (Request $request) use ($app) {
 });
 
 $app->get('/', function () use ($app) {
-    return $app->redirect($app->path('random_result'));
+    return $app->redirect($app->path('random_query'));
 })
 ->bind('root');
 
