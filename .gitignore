@@ -1,4 +1,4 @@
-vendor/
+/vendor/
 .*.sw?
 /app.db
 /app.ini
