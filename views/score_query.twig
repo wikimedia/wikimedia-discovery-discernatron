@@ -128,5 +128,8 @@
                 onChange.apply(row.find('input[value=' + (next) + ']').prop('checked', true));
             }
         });
+        $(document).ready(function () {
+            $('input:checked').each(onChange);
+        });
     </script>
 {% endblock %}
