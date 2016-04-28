@@ -67,6 +67,27 @@ class QueriesController
         }
     }
 
+    public function skipQueryById(Request $request, $id)
+    {
+        $maybeQuery = $this->queriesRepo->getQuery($id);
+        if ($maybeQuery->isEmpty()) {
+            // @todo 404
+            throw new \Exception('Query not found');
+        }
+
+        $form = $this->createSkipForm($id);
+        $form->handleRequest($request);
+
+        // If the form isn't valid just do nothing, not a big deal. Should
+        // look into adding session based notifications to make it easier to
+        // tell users about this.
+        if ($form->isValid()) {
+            $this->queriesRepo->markQuerySkipped($this->user, $id);
+        }
+
+        return $this->app->redirect($this->app->path('random_query'));
+    }
+
     public function queryById(Request $request, $id)
     {
         $maybeQuery = $this->queriesRepo->getQuery($id);
@@ -88,6 +109,39 @@ class QueriesController
             $this->user->uid
         );
 
+        $form = $this->createScoringForm($results);
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            $data = $form->getData();
+            $this->scoresRepo->storeQueryScores($this->user, $id, $data);
+
+            return $this->app->redirect($this->app->path('random_query', ['saved' => 1]));
+        }
+
+        return $this->twig->render('score_query.twig', [
+            'query' => $query,
+            'results' => $results,
+            'form' => $form->createView(),
+            'saved' => (bool) $request->query->get('saved'),
+            'skipForm' => $this->createSkipForm($id)->createView(),
+        ]);
+    }
+
+    private function createSkipForm($queryId)
+    {
+        $builder = $this->formFactory->createBuilder('form')
+            ->setAction($this->app->path('skip_query_by_id', ['id' => $queryId]))
+            ->add('submit', 'submit', [
+                'label' => 'Skip this query',
+                'attr' => ['class' => 'btn btn-warning'],
+            ]);
+
+        return $builder->getForm();
+    }
+
+    private function createScoringForm(array $results)
+    {
         $builder = $this->formFactory->createBuilder('form', null, array(
             'constraints' => array(new MinimumSubmitted('80%')),
         ));
@@ -105,24 +159,8 @@ class QueriesController
             ]);
         }
 
-        $form = $builder->getForm();
-        $form->handleRequest($request);
-
-        if ($form->isValid()) {
-            $data = $form->getData();
-            $this->scoresRepo->storeQueryScores($this->user, $id, $data);
-
-            return $this->app->redirect($this->app->path('random_query', ['saved' => 1]));
-        }
-
-        return $this->twig->render('score_query.twig', [
-            'query' => $query,
-            'results' => $results,
-            'form' => $form->createView(),
-            'saved' => (bool) $request->query->get('saved'),
-        ]);
+        return $builder->getForm();
     }
-
 
     /**
      * PHP's shuffle function loses the keys. So sort the keys

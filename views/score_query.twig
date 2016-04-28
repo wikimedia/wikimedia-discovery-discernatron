@@ -51,13 +51,16 @@
     {% endif %}
 
     <h3>Score Result</h3>
-    <div>
-        <dl class="dl-horizontal">
+    <div class="row">
+        <dl class="dl-horizontal col-md-8">
             <dt>Wiki</dt>
             <dd>{{ query.wiki }}</dd>
             <dt>Query</dt>
             <dd>{{ query.query }}</dd>
         </dl>
+        <div class="col-md-4">
+            {{ form(skipForm) }}
+        </div>
     </div>
 
     <noscript>
@@ -65,6 +68,7 @@
             <p class="bg-danger">Discernatron requires javascript on mobile devices</p>
         </div>
     </noscript>
+
 
     <form method="post" novalidate>
         {{ form_errors(form) }}

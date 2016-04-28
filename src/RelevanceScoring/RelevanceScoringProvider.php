@@ -44,6 +44,8 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
             ->bind('random_query_by_wiki');
         $controllers->match('/query/id/{id}',   'search.controller.queries:queryById')
             ->bind('query_by_id');
+        $controllers->post('/query/skip/{id}',   'search.controller.queries:skipQueryById')
+            ->bind('skip_query_by_id');
 
         return $controllers;
     }
