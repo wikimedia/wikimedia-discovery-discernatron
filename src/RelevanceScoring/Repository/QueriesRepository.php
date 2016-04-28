@@ -198,7 +198,7 @@ class QueriesRepository
         $params = [];
         $types = [];
         if ($userId !== null) {
-            $sql .= ' WHERE user_id = ?';
+            $sql .= ' AND user_id = ?';
             $params[] = $userId;
             $types[] = PDO::PARAM_INT;
         }
