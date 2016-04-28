@@ -151,10 +151,10 @@ class QueriesController
                 'expanded' => true,
                 'multiple' => false,
                 'choices' => [
-                    'Relevant',
-                    'Probably',
-                    'Maybe',
                     'Irrelevant',
+                    'Maybe',
+                    'Probably',
+                    'Relevant',
                 ],
             ]);
         }
