@@ -2,10 +2,6 @@
 
 {% form_theme form _self %}
 
-{% block choice_label %}
-    {# no label, our form will just use buttons #}
-{% endblock %}
-
 {% block head %}
     {{ parent() }}
     <style type="text/css">
@@ -55,7 +51,7 @@
 
         {% for child in form %}
             <div class="row border-xs border-sm">
-                <div class="click-for-next col-md-3">{{ child.vars.label }}</div>
+                <div class="click-for-next col-md-3">{{ form_label(child) }}</div>
                 {% for choice in child %}
                     <div class="col-md-2 hidden-xs hidden-sm click-for-next">
                         {{ form_label(choice) }}
