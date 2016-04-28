@@ -6,6 +6,7 @@ use Application;
 use Silex\ControllerCollection;
 use Silex\ControllerProviderInterface;
 use Silex\ServiceProviderInterface;
+use WikiMedia\RelevanceScoring\Console\CacheClear;
 use WikiMedia\RelevanceScoring\Console\Import;
 use WikiMedia\RelevanceScoring\Console\ImportPending;
 use WikiMedia\RelevanceScoring\Console\PurgeQuery;
@@ -157,6 +158,10 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
 
     private function registerConsole(Application $app)
     {
+		$app['search.console.cache-clear'] = function () use ($app) {
+			return new CacheClear($app['twig']);
+		};
+
         $app['search.console.import'] = function () use ($app) {
             return new Import(
                 $app['search.importer'],
@@ -181,6 +186,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
         };
 
         $app['search.console'] = [
+			'search.console.cache-clear',
             'search.console.import',
             'search.console.importPending',
             'search.console.purgeQuery',
