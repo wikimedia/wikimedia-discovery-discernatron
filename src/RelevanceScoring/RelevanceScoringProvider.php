@@ -104,6 +104,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                 [
                     'is_valid' => '#ires',
                     'results' => '#ires .g',
+                    'results_filter' => '.g-blk',
                     'url' => 'h3 a',
                     'snippet' => '.st',
                 ],
