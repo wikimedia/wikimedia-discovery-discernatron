@@ -31,10 +31,11 @@ class ImportedResult
          // make the bold assumption wikimedia wikis all
         // prefix with /wiki/
         $prefix = '/wiki/';
-        if (false === substr($path, 0, strlen($prefix))) {
+        if ($prefix !== substr($path, 0, strlen($prefix))) {
             throw new \Exception("Invalid url: $url");
         }
-        $title = strtr(substr($path, strlen($prefix)), '_', ' ');
+        $titlePart = substr($path, strlen($prefix));
+        $title = urldecode(strtr($titlePart, '_', ' '));
 
         return new self($source, $title, $position);
     }
