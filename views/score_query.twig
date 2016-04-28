@@ -98,7 +98,7 @@
 {% block js %}
     {{ parent() }}
     <script>
-        var valueToClass = ['relevant', 'probably', 'maybe', 'irrelevant'],
+        var valueToClass = ['irrelevant', 'maybe', 'probably', 'relevant'],
             onChange = function () {
                 var $this = $(this),
                     value = parseInt($this.val()),
