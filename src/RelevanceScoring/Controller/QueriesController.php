@@ -7,6 +7,7 @@ use Symfony\Component\Form\FormFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Twig_Environment;
 use WikiMedia\OAuth\User;
+use WikiMedia\RelevanceScoring\Assert\MinimumSubmitted;
 use WikiMedia\RelevanceScoring\Repository\QueriesRepository;
 use WikiMedia\RelevanceScoring\Repository\ResultsRepository;
 use WikiMedia\RelevanceScoring\Repository\ScoresRepository;
@@ -87,7 +88,9 @@ class QueriesController
             $this->user->uid
         );
 
-        $builder = $this->formFactory->createBuilder('form');
+        $builder = $this->formFactory->createBuilder('form', null, array(
+            'constraints' => array(new MinimumSubmitted('80%')),
+        ));
         foreach ($results as $resultId => $title) {
             $builder->add($resultId, 'choice', [
                 'label' => $title,
