@@ -81,6 +81,7 @@ class QueriesController
 
         $query = $maybeQuery->get();
         $results = $maybeResults->get();
+		shuffle($results);
 
         $builder = $this->formFactory->createBuilder('form');
         foreach ($results as $resultId => $title) {
