@@ -115,14 +115,9 @@ class QueriesController
             return $this->app->redirect($this->app->path('random_query', ['saved' => 1]));
         }
 
-        $wiki = reset($results)['wiki'];
-        $parts = parse_url($this->wikis[$wiki]);
-        $baseUrl = $parts['scheme'].'://'.$parts['host'].'/wiki/';
-
         return $this->twig->render('score_query.twig', [
             'query' => $query,
             'results' => $results,
-            'wikiBaseUrl' => $baseUrl,
             'form' => $form->createView(),
             'saved' => (bool) $request->query->get('saved'),
         ]);
