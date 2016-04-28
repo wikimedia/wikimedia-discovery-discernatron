@@ -32,9 +32,10 @@ class QueriesRepository
     {
         $qb = $this->db->createQueryBuilder()
             ->select('MAX(id)')
-            ->from('queries');
+            ->from('queries')
+            ->where('imported = 1');
         if ($wiki !== null) {
-            $qb->where('wiki = ?');
+            $qb->andWhere('wiki = ?');
             $qb->setParameter(0, $wiki);
         }
 
@@ -80,7 +81,10 @@ class QueriesRepository
 
         if ($id === false) {
             $qb->where('q.id <= ?')
-                ->andWhere('s.id IS NULL');
+                ->andWhere('s.id IS NULL')
+                ->andWhere('q_s.id IS NULL')
+                ->andWhere('q.imported = 1')
+                ->orderBy('q.id', 'DESC');
             if ($wiki !== null) {
                 $qb->andWhere('q.wiki = ?');
             }
