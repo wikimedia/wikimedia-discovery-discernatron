@@ -65,7 +65,7 @@ class Importer
         return count($results);
     }
 
-    public function importPending($limit, OutputInterface $output, $userId = null)
+    public function importPending($limit, $userId = null)
     {
         $queries = $this->queriesRepo->getPendingQueries($limit, $userId);
         $imported = 0;
