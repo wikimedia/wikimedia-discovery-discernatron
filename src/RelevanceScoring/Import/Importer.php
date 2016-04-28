@@ -16,6 +16,11 @@ class Importer
     private $wikis;
     private $resultsPerSource = 25;
 
+    /**
+     * @var callable
+     */
+    private $output;
+
     public function __construct(
         Connection $db,
         QueriesRepository $queriesRepo,
@@ -28,6 +33,16 @@ class Importer
         $this->resultsRepo = $resultsRepo;
         $this->wikis = $wikis;
         $this->getters = $getters;
+        $this->output = function () {};
+    }
+
+    public function setOutput($callable) {
+        $this->output = $callable;
+    }
+
+    private function output($line) {
+        $callable = $this->output;
+        $callable($line);
     }
 
     public function import(User $user, $wiki, $query)
@@ -50,11 +65,12 @@ class Importer
         return count($results);
     }
 
-    public function importPending($limit, $userId = null)
+    public function importPending($limit, OutputInterface $output, $userId = null)
     {
         $queries = $this->queriesRepo->getPendingQueries($limit, $userId);
         $imported = 0;
         foreach ($queries as $query) {
+            $this->output("Importing {$query['wiki']}: {$query['query']}");
             $results = $this->performSearch($query['wiki'], $query['query']);
             $this->db->transactional(function () use ($query, $results) {
                 $this->resultsRepo->storeResults($query['user_id'], $query['id'], $results);
@@ -76,7 +92,7 @@ class Importer
     {
         $promises = [];
         foreach ($this->getters as $key => $getter) {
-            echo "Making request from $key\n";
+            $this->output("Making request from $key");
             $promises[$key] = $getter->fetchAsync($wiki, $query);
         }
         $responses = \GuzzleHttp\Promise\unwrap($promises);
@@ -85,7 +101,7 @@ class Importer
         foreach ($responses as $key => $response) {
             $newResults = $this->getters[$key]->handleResponse($response, $wiki, $query);
             $newResults = array_slice($newResults, 0, $this->resultsPerSource);
-            echo 'Merging '.count($newResults)."results from $key\n";
+            $this->output('Merging '.count($newResults)." results from $key");
             $results = array_merge($results, $newResults);
         }
 

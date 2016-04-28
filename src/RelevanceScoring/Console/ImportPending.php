@@ -44,6 +44,9 @@ class ImportPending extends Command
             }
             $userId = $maybeUser->get()->uid;
         }
+        $this->importer->setOutput(function ($line) use ($output) {
+            $output->writeln($line);
+        });
         list($queries, $results) = $this->importer->importPending(1, $userId);
         $output->writeln("Imported $queries queries with $results results");
 

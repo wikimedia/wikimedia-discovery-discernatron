@@ -147,10 +147,10 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                 $app['search.repository.results'],
                 $app['search.wikis'],
                 [
-                    $app['search.importer.bing'],
-                    $app['search.importer.google'],
-                    $app['search.importer.ddg'],
-                    $app['search.importer.mediawiki'],
+                    'bing' => $app['search.importer.bing'],
+                    'google' => $app['search.importer.google'],
+                    'ddg' => $app['search.importer.ddg'],
+                    'mediawiki' => $app['search.importer.mediawiki'],
                 ]
             );
         };
@@ -158,9 +158,9 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
 
     private function registerConsole(Application $app)
     {
-		$app['search.console.cache-clear'] = function () use ($app) {
-			return new CacheClear($app['twig']);
-		};
+        $app['search.console.cache-clear'] = function () use ($app) {
+            return new CacheClear($app['twig']);
+        };
 
         $app['search.console.import'] = function () use ($app) {
             return new Import(
@@ -186,7 +186,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
         };
 
         $app['search.console'] = [
-			'search.console.cache-clear',
+            'search.console.cache-clear',
             'search.console.import',
             'search.console.importPending',
             'search.console.purgeQuery',
