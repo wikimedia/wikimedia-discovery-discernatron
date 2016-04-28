@@ -49,21 +49,31 @@ class QueriesRepository
             ->from('queries', 'q')
             ->add('join', [
                 'q' => [
-                    'joinType' => 'left outer',
-                    'joinTable' => 'scores',
-                    'joinAlias' => 's',
-                    'joinCondition' => 'q.id = s.query_id AND s.user_id = ?',
+                    [
+                        'joinType' => 'left outer',
+                        'joinTable' => 'scores',
+                        'joinAlias' => 's',
+                        'joinCondition' => 'q.id = s.query_id AND s.user_id = ?',
+                    ],
+                    [
+                        'joinType' => 'left outer',
+                        'joinTable' => 'queries_skipped',
+                        'joinAlias' => 'q_s',
+                        'joinCondition' => 'q.id = q_s.query_id AND q_s.user_id = ?',
+                    ],
                 ],
-            ], true)
+            ])
             ->setParameter(0, $user->uid)
+            ->setParameter(1, $user->uid)
             ->where('q.id > ?')
-            ->setParameter(1, $rand)
+            ->setParameter(2, $rand)
             ->andWhere('s.id IS NULL')
-			->andWhere('q.imported = 1')
+            ->andWhere('q_s.id IS NULL')
+            ->andWhere('q.imported = 1')
             ->orderBy('q.id', 'ASC');
         if ($wiki !== null) {
             $qb->andWhere('q.wiki = ?')
-                ->setParameter(2, $wiki);
+                ->setParameter(3, $wiki);
         }
 
         $id = $qb->execute()->fetchColumn();
@@ -113,7 +123,7 @@ class QueriesRepository
     public function getQuery($id)
     {
         $result = $this->db->fetchAll(
-            'SELECT user_id, wiki, query, created, imported FROM queries WHERE id = ?',
+            'SELECT id, user_id, wiki, query, created, imported FROM queries WHERE id = ?',
             [$id]
         );
 
@@ -209,4 +219,13 @@ class QueriesRepository
 
         return $this->db->fetchAll($sql, $params, $types);
     }
+
+    public function markQuerySkipped(User $user, $queryId)
+    {
+        $this->db->insert('queries_skipped', [
+            'user_id' => $user->uid,
+            'query_id' => $queryId,
+        ]);
+    }
+
 }
