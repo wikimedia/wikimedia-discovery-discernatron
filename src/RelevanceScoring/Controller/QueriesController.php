@@ -80,8 +80,12 @@ class QueriesController
         }
 
         $query = $maybeQuery->get();
-        $results = $maybeResults->get();
-		shuffle($results);
+        $results = $this->shufflePreserveKeys(
+            $maybeResults->get(),
+            // user id is used to give each user a different order,
+            // but the same user gets same order each time.
+            $this->user->uid
+        );
 
         $builder = $this->formFactory->createBuilder('form');
         foreach ($results as $resultId => $title) {
@@ -119,5 +123,46 @@ class QueriesController
             'form' => $form->createView(),
             'saved' => (bool) $request->query->get('saved'),
         ]);
+    }
+
+
+    /**
+     * PHP's shuffle function loses the keys. So sort the keys
+     * and make a new array based on the order of sorted keys.
+     * Additionally php's shuffle is automatically seeded so we
+     * can't get the same order across requests. Fix that by using
+     * a local fisher yates implementation.
+     *
+     * @param array $array
+     * @return array
+     */
+    private function shufflePreserveKeys(array $array, $seed)
+    {
+        $keys = $this->fisherYatesShuffle(array_keys($array), $seed);
+        $result = array();
+        foreach ($keys as $key) {
+            $result[$key] = $array[$key];
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array $array Must be numerically indexed starting
+     *  from 0 with no gaps.
+     * @param int $seed
+     * @return array
+     */
+    private function fisherYatesShuffle(array $array, $seed)
+    {
+        mt_srand($seed);
+        for ($i = count($array) - 1; $i > 0; $i--) {
+            $j = mt_rand(0, $i);
+            $tmp = $array[$i];
+            $array[$i] = $array[$j];
+            $array[$j] = $tmp;
+        }
+
+        return $array;
     }
 }
