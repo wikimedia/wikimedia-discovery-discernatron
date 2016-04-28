@@ -59,6 +59,7 @@ class QueriesRepository
             ->where('q.id > ?')
             ->setParameter(1, $rand)
             ->andWhere('s.id IS NULL')
+			->andWhere('q.imported = 1')
             ->orderBy('q.id', 'ASC');
         if ($wiki !== null) {
             $qb->andWhere('q.wiki = ?')
