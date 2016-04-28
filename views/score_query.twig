@@ -60,6 +60,12 @@
         </dl>
     </div>
 
+    <noscript>
+        <div class="errors hidden-md hidden-lg">
+            <p class="bg-danger">Discernatron requires javascript on mobile devices</p>
+        </div>
+    </noscript>
+
     <form method="post" novalidate>
         {{ form_errors(form) }}
         {{ form_row(form._token) }}
