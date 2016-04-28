@@ -92,8 +92,9 @@
                 row = $(this).closest('.row'),
                 selected = parseInt(row.find('input:checked').val());
 
-            // Don't override real clicks
-            if ($(evt.toElement).is('label, input')) {
+            // Don't override real clicks. We have to check originalEvent because toElement
+			// isn't populated in firefox 46
+            if ($(evt.toElement).is('label, input') || $(evt.originalEvent.target).is('label, input')) {
                 return;
             }
 
