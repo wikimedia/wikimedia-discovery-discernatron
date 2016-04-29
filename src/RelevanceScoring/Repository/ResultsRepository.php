@@ -43,11 +43,11 @@ class ResultsRepository
 
         $rand = mt_rand(0, $maxId);
         $sql = <<<EOD
-SELECT r.id 
-  FROM results r 
+SELECT r.id
+  FROM results r
   LEFT OUTER JOIN scores s
-    ON r.id = s.result_id AND s.user_id = ? 
- WHERE r.id > ? 
+    ON r.id = s.result_id AND s.user_id = ?
+ WHERE r.id > ?
    AND s.id IS NULL
  ORDER BY r.id ASC
 EOD;
@@ -105,17 +105,25 @@ EOD;
      */
     public function getQueryResults($queryId)
     {
-        $results = $this->db->fetchAll(
-            'SELECT id, title FROM results WHERE query_id = ?',
-            [$queryId]
-        );
+        // @todo this takes a randomly selected snippet. It might be better if
+        // we could rank snippets and take "the best".
+        $sql = <<<EOD
+SELECT r.id, r.title, r_s.snippet
+  FROM results r
+  JOIN results_sources r_s
+    ON r_s.results_id = r.id
+ WHERE r.query_id = ?
+ GROUP BY r.id
+ ORDER BY r.id DESC
+EOD;
+        $results = $this->db->fetchAll($sql, [$queryId]);
         if ($results === false) {
             return new None();
         }
-        
+
         $titles = [];
         foreach ($results as $row) {
-            $titles[$row['id']] = $row['title'];
+            $titles[$row['id']] = $row;
         }
         return new Some($titles);
     }
@@ -155,6 +163,7 @@ EOD;
                 'results_id' => $resultIds[$result->getTitle()],
                 'user_id' => $userId,
                 'source' => $result->getSource(),
+                'snippet' => $result->getSnippet(),
                 'position' => $result->getPosition(),
                 'created' => $now,
             ]);

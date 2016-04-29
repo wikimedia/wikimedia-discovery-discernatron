@@ -125,7 +125,22 @@ class QueriesController
             'form' => $form->createView(),
             'saved' => (bool) $request->query->get('saved'),
             'skipForm' => $this->createSkipForm($id)->createView(),
+            'baseWikiUrl' => $this->getBaseUrl($query['wiki']),
         ]);
+    }
+
+    /**
+     * @var string $wiki
+     * @return string
+     */
+    private function getBaseUrl($wiki)
+    {
+        if (!isset($this->wikis[$wiki])) {
+            throw new \RuntimeException("Unknown wiki: $wiki");
+        }
+        $domain = parse_url($this->wikis[$wiki], PHP_URL_HOST);
+
+        return "https://$domain/wiki";
     }
 
     private function createSkipForm($queryId)
@@ -145,9 +160,9 @@ class QueriesController
         $builder = $this->formFactory->createBuilder('form', null, array(
             'constraints' => array(new MinimumSubmitted('80%')),
         ));
-        foreach ($results as $resultId => $title) {
+        foreach ($results as $resultId => $row) {
             $builder->add($resultId, 'choice', [
-                'label' => $title,
+                'label' => $row['title'],
                 'expanded' => true,
                 'multiple' => false,
                 'choices' => [

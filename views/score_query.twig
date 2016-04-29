@@ -36,10 +36,13 @@
         .errors p {
             padding: 15px;
         }
+        .snippet {
+            padding-left: 1em;
+        }
         @media (max-width: 768px) {
             .border-xs {
                 border: 1px solid black;
-            } 
+            }
         }
         @media (max-width: 991px) and (min-width: 768px) {
             .border-sm {
@@ -76,18 +79,35 @@
 
     <form method="post" novalidate>
         {{ form_errors(form) }}
-        {{ form_row(form._token) }}
+        {{ form_widget(form._token) }}
 
         {% for child in form %}
-            <div class="row border-xs border-sm">
-                <div class="click-for-next col-md-3">{{ child.vars.label }}</div>
-                {% for choice in child %}
-                    <div class="col-md-2 hidden-xs hidden-sm click-for-next">
-                        {{ form_label(choice) }}
-                        {{ form_widget(choice) }}
+            {% if child.vars.name != '_token' %}
+                <div class="result">
+                    <div class="row border-xs border-sm">
+                        <h5 class="click-for-next col-md-3">
+                            <!-- Default hidden, javascript will manage them" -->
+                            <span class="glyphicon glyphicon-chevron-down show-snippet hidden"></span>
+                            <span class="glyphicon glyphicon-chevron-up hide-snippet hidden"></span>
+                            {{ child.vars.label }}
+                            <small>
+                                <a href="{{ baseWikiUrl }}/{{ child.vars.label }}" target="_blank">link</a>
+                            </small>
+                        </h5>
+                        {% for choice in child %}
+                            <div class="col-md-2 hidden-xs hidden-sm click-for-next">
+                                {{ form_label(choice) }}
+                                {{ form_widget(choice) }}
+                            </div>
+                        {% endfor %}
                     </div>
-                {% endfor %}
-            </div>
+                    <div class="row snippet hidden">
+                        <blockquote class="col-md-9">
+                            <p>{{ results[child.vars.name].snippet }}</p>
+                        </blockquote>
+                    </div>
+                </div>
+            {% endif %}
         {% endfor %}
         <div class="row">
             <input type="submit" class="btn btn-default" />
@@ -103,41 +123,55 @@
                 var $this = $(this),
                     value = parseInt($this.val()),
                     $row = $this.closest('.row');
-                
+
                 $row.removeClass(valueToClass.join(' '));
                 if (!isNaN(value)) {
                     $row.addClass(valueToClass[value]);
                 }
+            },
+            onClickForNext = function (evt) {
+                // Find the currently selected choice
+                var next,
+                    row = $(this).closest('.row'),
+                    selected = parseInt(row.find('input:checked').val()),
+                    skip = 'label, input, a, .glyphicon';
+
+                // Don't override real clicks. We have to check originalEvent because toElement
+                // isn't populated in firefox 46
+                if ($(evt.toElement).is(skip) || $(evt.originalEvent.target).is(skip)) {
+                    return;
+                }
+
+                // if nothing selected default to last so we wrap to beginning
+                if (isNaN(selected)) {
+                    selected = 4;
+                }
+                next = (selected + 1) % 5;
+                if (next == 4) {
+                    // non existent value means unselect
+                    row.find('input:checked').prop('checked', false);
+                    onChange.apply(row);
+                } else {
+                    onChange.apply(row.find('input[value=' + (next) + ']').prop('checked', true));
+                }
+            },
+            onShowSnippet = function (evt) {
+                $(this).toggle(false);
+                $(this).siblings('.hide-snippet').removeClass('hidden').toggle(true);
+                $(this).closest('.result').find('.snippet').removeClass('hidden').toggle(true);
+            },
+            onHideSnippet = function (evt) {
+                $(this).toggle(false);
+                $(this).siblings('.show-snippet').toggle(true);
+                $(this).closest('.result').find('.snippet').toggle(false);
             };
 
-        $('input[type=radio]').change(onChange);
-        $('.click-for-next').click(function (evt) {
-            // Find the currently selected choice
-            var next,
-                row = $(this).closest('.row'),
-                selected = parseInt(row.find('input:checked').val());
-
-            // Don't override real clicks. We have to check originalEvent because toElement
-            // isn't populated in firefox 46
-            if ($(evt.toElement).is('label, input') || $(evt.originalEvent.target).is('label, input')) {
-                return;
-            }
-
-            // if nothing selected default to last so we wrap to beginning
-            if (isNaN(selected)) {
-                selected = 4;
-            }
-            next = (selected + 1) % 5;
-            if (next == 4) {
-                // non existent value means unselect
-                row.find('input:checked').prop('checked', false);
-                onChange.apply(row);
-            } else {
-                onChange.apply(row.find('input[value=' + (next) + ']').prop('checked', true));
-            }
-        });
         $(document).ready(function () {
             $('input:checked').each(onChange);
+            $('input[type=radio]').change(onChange);
+            $('.click-for-next').click(onClickForNext);
+            $('.show-snippet').removeClass('hidden').click(onShowSnippet);
+            $('.hide-snippet').click(onHideSnippet);
         });
     </script>
 {% endblock %}

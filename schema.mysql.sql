@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `results_sources` (
     user_id INTEGER UNSIGNED NOT NULL,
     source VARCHAR(32) NOT NULL,
     position TINYINT UNSIGNED NOT NULL,
+    snippet TEXT NOT NULL,
     created INTEGER UNSIGNED NOT NULL,
     FOREIGN KEY `results_user_id` (`user_id`) REFERENCES `users`(`id`),
     FOREIGN KEY `results_source_results_id` (`results_id`) REFERENCES `results`(`id`),

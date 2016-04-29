@@ -74,6 +74,7 @@ class MediaWikiResultGetter implements ResultGetterInterface
             $results[] = new ImportedResult(
                 $wiki,
                 $result['title'],
+                html_entity_decode(strip_tags($result['snippet'])),
                 count($results)
             );
         }

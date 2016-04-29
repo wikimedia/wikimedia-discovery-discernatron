@@ -89,11 +89,7 @@ class HtmlResultGetter implements ResultGetterInterface
 
         $domain = strtolower($this->getWikiDomain($wiki));
         $results = [];
-        $resultElements = $doc[$this->selectors['results']];
-        if (isset($this->selectors['results_filter'])) {
-            $resultElements = $resultElements->filter($this->selectors['results_filter']);
-        }
-        foreach ($resultElements as $result) {
+        foreach ($doc[$this->selectors['results']] as $result) {
             $pq = \pq($result);
             $url = $pq[$this->selectors['url']]->attr('href');
             $urlDomain = strtolower(parse_url($url, PHP_URL_HOST));
@@ -101,6 +97,7 @@ class HtmlResultGetter implements ResultGetterInterface
                 $results[] = ImportedResult::createFromURL(
                     $this->source,
                     $pq[$this->selectors['url']]->attr('href'),
+                    $pq[$this->selectors['snippet']]->text(),
                     count($results)
                 );
             }
