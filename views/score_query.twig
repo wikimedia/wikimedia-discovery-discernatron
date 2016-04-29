@@ -21,6 +21,10 @@
 {% block head %}
     {{ parent() }}
     <style type="text/css">
+        .result .row {
+            display: flex;
+            align-items: center;
+        }
         .row.relevant {
             background-color: green;
         }
@@ -59,7 +63,7 @@
 
     <h3>Score Result</h3>
     <div class="row">
-        <dl class="dl-horizontal col-md-8">
+        <dl class="dl-horizontal col-md-8 col-xs-8">
             <dt>Wiki</dt>
             <dd>{{ query.wiki }}</dd>
             <dt>Query</dt>
@@ -85,7 +89,7 @@
             {% if child.vars.name != '_token' %}
                 <div class="result">
                     <div class="row border-xs border-sm">
-                        <h5 class="click-for-next col-md-3">
+                        <h5 class="click-for-next col-md-3 col-xs-9">
                             <!-- Default hidden, javascript will manage them" -->
                             <span class="glyphicon glyphicon-chevron-down show-snippet hidden"></span>
                             <span class="glyphicon glyphicon-chevron-up hide-snippet hidden"></span>
@@ -100,6 +104,7 @@
                                 {{ form_widget(choice) }}
                             </div>
                         {% endfor %}
+                        <div class="hidden-md hidden-lg rating col-md-2 click-for-next text-center"></div>
                     </div>
                     <div class="row snippet hidden">
                         <blockquote class="col-md-9">
@@ -127,6 +132,9 @@
                 $row.removeClass(valueToClass.join(' '));
                 if (!isNaN(value)) {
                     $row.addClass(valueToClass[value]);
+                    $row.find('.rating').text($this.siblings('label').text());
+                } else {
+                    $row.find('.rating').text('');
                 }
             },
             onClickForNext = function (evt) {
