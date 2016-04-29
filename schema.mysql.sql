@@ -25,15 +25,19 @@ CREATE TABLE IF NOT EXISTS `results` (
 );
 CREATE TABLE IF NOT EXISTS `results_sources` (
     id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    query_id INTEGER UNSIGNED NOT NULL,
     results_id INTEGER UNSIGNED NOT NULL,
     user_id INTEGER UNSIGNED NOT NULL,
     source VARCHAR(32) NOT NULL,
     position TINYINT UNSIGNED NOT NULL,
     snippet TEXT NOT NULL,
+    snippet_score TINYINT UNSIGNED NOT NULL,
     created INTEGER UNSIGNED NOT NULL,
-    FOREIGN KEY `results_user_id` (`user_id`) REFERENCES `users`(`id`),
+    FOREIGN KEY `results_source_query_id` (`query_id`) REFERENCES `queries`(`id`),
+    FOREIGN KEY `results_source_user_id` (`user_id`) REFERENCES `users`(`id`),
     FOREIGN KEY `results_source_results_id` (`results_id`) REFERENCES `results`(`id`),
-    UNIQUE KEY `results_source_results_id_source` (`results_id`, `source`)
+    UNIQUE KEY `results_source_results_id_source` (`results_id`, `source`),
+    KEY `results_sources_snippet_order` (`query_id`, `results_id`, `snippet_score`)
 );
 CREATE TABLE IF NOT EXISTS scores (
     id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,

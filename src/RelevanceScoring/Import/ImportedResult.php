@@ -15,7 +15,7 @@ class ImportedResult
 
     /**
      * ImportedResult constructor.
-     * 
+     *
      * @param string $source
      * @param string $title
      * @param string $snippet
@@ -62,5 +62,22 @@ class ImportedResult
     public function getPosition()
     {
         return $this->position;
+    }
+
+    public function getSnippetScore()
+    {
+        if (strlen($this->snippet) === 0) {
+            return 0;
+        }
+        switch($this->source) {
+        case 'google':
+            return 100;
+        case 'bing':
+            return 80;
+        case 'ddg':
+            return 50;
+        default:
+            return 10;
+        }
     }
 }

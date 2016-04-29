@@ -105,18 +105,24 @@ EOD;
      */
     public function getQueryResults($queryId)
     {
-        // @todo this takes a randomly selected snippet. It might be better if
-        // we could rank snippets and take "the best".
         $sql = <<<EOD
 SELECT r.id, r.title, r_s.snippet
   FROM results r
+  JOIN (SELECT results_id, MAX(snippet_score) as snippet_score
+          FROM results_sources
+         WHERE query_id = ?
+         GROUP BY results_id
+       ) r_s_max
+    ON r.id = r_s_max.results_id
   JOIN results_sources r_s
-    ON r_s.results_id = r.id
+    ON r_s.results_id = r_s_max.results_id
+   AND r_s.snippet_score = r_s_max.snippet_score
+   AND r_s.query_id = ?
  WHERE r.query_id = ?
  GROUP BY r.id
  ORDER BY r.id DESC
 EOD;
-        $results = $this->db->fetchAll($sql, [$queryId]);
+        $results = $this->db->fetchAll($sql, [$queryId, $queryId, $queryId]);
         if ($results === false) {
             return new None();
         }
@@ -160,10 +166,12 @@ EOD;
         foreach ($results as $result) {
             echo "Inserting {$result->getSource()}: {$resultIds[$result->getTitle()]} {$result->getTitle()}\n";
             $affected = $this->db->insert('results_sources', [
+                'query_id' => $queryId,
                 'results_id' => $resultIds[$result->getTitle()],
                 'user_id' => $userId,
                 'source' => $result->getSource(),
                 'snippet' => $result->getSnippet(),
+                'snippet_score' => $result->getSnippetScore(),
                 'position' => $result->getPosition(),
                 'created' => $now,
             ]);
