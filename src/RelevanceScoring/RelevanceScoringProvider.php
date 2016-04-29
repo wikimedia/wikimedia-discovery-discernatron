@@ -133,7 +133,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                     'is_valid' => '#links',
                     'results' => '#links .web-result',
                     'url' => 'a',
-                    'snippet' => '.snippet',
+                    'snippet' => '.snippet, .result__snippet',
                 ]
             );
         };
