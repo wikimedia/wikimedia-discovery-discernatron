@@ -35,13 +35,24 @@ class ImportedResult
          // make the bold assumption wikimedia wikis all
         // prefix with /wiki/
         $prefix = '/wiki/';
-        if ($prefix !== substr($path, 0, strlen($prefix))) {
-            throw new \Exception("Invalid url: $url");
+        if ($prefix === substr($path, 0, strlen($prefix))) {
+            $titlePart = substr($path, strlen($prefix));
+            $title = urldecode(strtr($titlePart, '_', ' '));
+            if (!empty($title)) {
+                return new self($source, $title, $snippet, $position);
+            }
         }
-        $titlePart = substr($path, strlen($prefix));
-        $title = urldecode(strtr($titlePart, '_', ' '));
 
-        return new self($source, $title, $snippet, $position);
+        $query = parse_url($url, PHP_URL_QUERY);
+        if ($query) {
+            parse_str($query, $decoded);
+            if (!empty($decoded['title'])) {
+                $title = strtr($decoded['title'], '_', ' ');
+                return new self($source, $title, $snippet, $position);
+            }
+        }
+
+        throw new \Exception("Invalid url: $url");
     }
 
     public function getSource()
