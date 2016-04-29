@@ -11,9 +11,50 @@
 {% block content_container %}
     <div class="jumbotron">
         <div class="container">
-            <h1>Help make search better!</h1>
-            <p>@TODO say something about how it makes anything better</p>
+            <h1>Search needs your help!</h1>
+            <p>
+                To iterate faster on changes to search we need to be able to test search
+                changes before we push them out to users.  Discernatron is a platform for
+                collection of human judgement of search result relevance. Basically, when
+                evaluating potential changes to search we will rate those changes by how
+                much closer we can get to putting the most relevant articles, as judged
+                by humans in Discernatron, at the top of the page.
+            </p>
             <p><a class="btn btn-primary btn-lg" href="{{ path('oauth_authorize') }}" role="button">Login via {{ domain }} &raquo;</a></p>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <h3>What queries am i rating?</h3>
+            <p>
+                Every month the discovery team loads approximately 500 randomly selected search
+                queries from the English Wikipedia into Discernatron for grading. These queries
+                represent around 0.0001% of the total full text queries issued. This sample is
+                incredibly small, but still represents a wide swath of the types of queries
+                received. Before being released to Discernatron two WMF employee's review the
+                sampled set of queries and remove anything that could be considered personally
+                identifiable information (PII). Initially only queries for English Wikipedia
+                are being used but we will expand to other languages, such as french, Spanish
+                and Russia, as time goes by.
+            </p>
+            <h3>So someone is looking at all my searches?</h3>
+            <p>
+                Not really. When reviewing queries there is no additional meta data, such as
+                user name, location, or IP address. Additionally due to the sample size it is
+                very unlikely that the sample contains more than one query from any single
+                user.
+            </p>
+            <h3>What kinds of queries are removed?</h3>
+            <p>
+                Anything potentially personally identifiable. This means any kind of phone
+                number, serial number, or non-notable address. We remove searches for specific
+                URLs and non-notable companies. Additionally names of non-notable people
+                (those that don't have wiki articles and aren't mentioned prominently in any
+                other article). For the benefit of graders most non-English searches are also
+                removed, as it would be hard to judge the quality of results. Finally "junk"
+                queries, such as "Ikofjfgbgtbrtlbluirytytrohooygyugc", which make up one to two
+                percent of total query volume are removed.
+            </p>
         </div>
     </div>
 {% endblock %}

@@ -45,18 +45,18 @@ $app['guzzle.cache'] = true;
 $app['guzzle'] = function () use ($app) {
     $stack = new GuzzleHttp\HandlerStack(GuzzleHttp\choose_handler());
 
-	if ($app['guzzle.cache']) {
-	    // cache requests for 24 hours, makes debugging easier without repeatedly
-	    // hitting the search engines and getting blocked
-	    $stack->push(new Kevinrob\GuzzleCache\CacheMiddleware(
-	        new Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy(
-	            new Kevinrob\GuzzleCache\Storage\DoctrineCacheStorage(
-	                new Doctrine\Common\Cache\FilesystemCache(__DIR__.'/cache/guzzle')
-	            ),
-	            24 * 60 * 60
-	        )
-	    ));
-	}
+    if ($app['guzzle.cache']) {
+        // cache requests for 24 hours, makes debugging easier without repeatedly
+        // hitting the search engines and getting blocked
+        $stack->push(new Kevinrob\GuzzleCache\CacheMiddleware(
+            new Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy(
+                new Kevinrob\GuzzleCache\Storage\DoctrineCacheStorage(
+                    new Doctrine\Common\Cache\FilesystemCache(__DIR__.'/cache/guzzle')
+                ),
+                24 * 60 * 60
+            )
+        ));
+    }
 
     return new GuzzleHttp\Client([
         'timeout' => 2.0,

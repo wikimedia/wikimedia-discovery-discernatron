@@ -21,7 +21,7 @@ class ScoresRepository
         $this->db->insert('scores', [
             'user_id' => $user->uid,
             'result_id' => $resultId,
-			'query_id' => $queryId,
+            'query_id' => $queryId,
             'score' => $score,
             'created' => time(),
         ]);
@@ -29,13 +29,13 @@ class ScoresRepository
 
     public function storeQueryScores(User $user, $queryId, array $scores)
     {
-		$this->db->transactional(function() use ($user, $queryId, $scores) {
-	        foreach ($scores as $resultId => $score) {
-				if ($score !== null) {
-		            $this->storeQueryScore($user, $queryId, $resultId, $score);
-				}
-	        }
-		});
+        $this->db->transactional(function() use ($user, $queryId, $scores) {
+            foreach ($scores as $resultId => $score) {
+                if ($score !== null) {
+                    $this->storeQueryScore($user, $queryId, $resultId, $score);
+                }
+            }
+        });
     }
 
     public function getAll()
