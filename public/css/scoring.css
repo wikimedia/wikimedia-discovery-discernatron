@@ -1,0 +1,32 @@
+.result .row {
+    display: flex;
+    align-items: center;
+}
+.row.relevant {
+    background-color: green;
+}
+.row.probably {
+    background-color: yellow;
+}
+.row.maybe {
+    background-color: orange;
+}
+.row.irrelevant {
+    background-color: red;
+}
+.errors p {
+    padding: 15px;
+}
+.snippet {
+    padding-left: 1em;
+}
+@media (max-width: 768px) {
+    .border-xs {
+        border: 1px solid black;
+    }
+}
+@media (max-width: 991px) and (min-width: 768px) {
+    .border-sm {
+        border: 1px solid black;
+    }
+}
