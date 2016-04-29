@@ -1,5 +1,10 @@
 {% extends 'layout.twig' %}
 
+{% block head %}
+    {{ parent() }}
+    <link href="/css/scoring.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
 {% block content %}
     <div class="row">
         <a href="{{ path('random_query') }}" class="btn btn-default">Continue to scoring</a>
@@ -12,12 +17,14 @@
         <p>
             You will be presented with a page containing the query at the very top and a
             list of results that could be relevant to the query. By tapping on the result
-            your relevance ranking will cycle from None to Irrelevant (red), Maybe Relevant
-            (orange), Probably Relevant (yellow), and Relevant (green). Tapping once more
-            after green will bring the result back to unrated. You must rate at least 80%
-            of the results to a query for the results to be saved. If you aren't sure select
-            'Skip this query' and you will be taken to a new query to rate. Skipped queries
-            will not be shown to you again.
+            your relevance ranking will cycle from None to <span class="irrelevant">
+            Irrelevant</span>, <span class="maybe">Maybe Relevant</span>, <span class="probably">
+            Probably Relevant</span>, and <span class="relevant">Relevant</span>. Tapping
+            once more after <span class="relevant">green</span> will bring the result back
+            to unrated. You must rate at least 80% of the results to a query for the
+            results to be saved. If you aren't sure select 'Skip this query' and you will
+            be taken to a new query to rate. Skipped queries will not be shown to you
+            again.
         </p>
 
         <h3>What differentiates Relevant from Probably Relevant?</h3>

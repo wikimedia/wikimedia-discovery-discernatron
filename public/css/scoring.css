@@ -2,16 +2,17 @@
     display: flex;
     align-items: center;
 }
-.row.relevant {
+.relevant {
     background-color: green;
+    color: white;
 }
-.row.probably {
+.probably {
     background-color: yellow;
 }
-.row.maybe {
+.maybe {
     background-color: orange;
 }
-.row.irrelevant {
+.irrelevant {
     background-color: red;
 }
 .errors p {
