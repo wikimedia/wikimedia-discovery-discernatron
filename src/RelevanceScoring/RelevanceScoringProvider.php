@@ -38,6 +38,8 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
         $controllers->get('/scores', 'search.controller.scores:scores')
             ->bind('scores');
 
+        $controllers->get('/instructions',      'search.controller.queries:instructions')
+            ->bind('instructions');
         $controllers->get('/query',             'search.controller.queries:randomQuery')
             ->bind('random_query');
         $controllers->get('/query/wiki/{wiki}', 'search.controller.queries:randomQuery')

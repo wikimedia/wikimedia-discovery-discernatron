@@ -51,6 +51,11 @@ class QueriesController
         $this->wikis = $wikis;
     }
 
+    public function instructions()
+    {
+        return $this->twig->render('instructions.twig');
+    }
+
     public function randomQuery(Request $request, $wiki = null)
     {
         $maybeId = $this->queriesRepo->getRandomUngradedQuery($this->user, $wiki);

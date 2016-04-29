@@ -18,7 +18,7 @@ $app->register(new Silex\Provider\ServiceControllerServiceProvider());
 $oauthProvider = new WikiMedia\OAuth\OAuthProvider();
 $app->register($oauthProvider, [
     'oauth.callback_uri' => 'oob',
-    'oauth.login_complete_redirect' => 'random_query',
+    'oauth.login_complete_redirect' => 'instructions',
 ]);
 $app->mount('/oauth', $oauthProvider);
 
