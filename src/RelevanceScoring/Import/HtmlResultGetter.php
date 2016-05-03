@@ -58,10 +58,6 @@ class HtmlResultGetter implements ResultGetterInterface
         ]);
     }
 
-    private function getWikiDomain($wiki)
-    {
-        return parse_url($this->wikis[$wiki], PHP_URL_HOST);
-    }
     /**
      * @param ResponseInterface $response
      * @param string            $wiki
@@ -74,7 +70,6 @@ class HtmlResultGetter implements ResultGetterInterface
     public function handleResponse(ResponseInterface $response, $wiki, $query)
     {
         if ($response->getStatusCode() !== 200) {
-            var_dump($response);
             throw new RuntimeException('Failed search');
         }
 
@@ -87,16 +82,14 @@ class HtmlResultGetter implements ResultGetterInterface
             throw new RuntimeException('No results section');
         }
 
-        $domain = strtolower($this->getWikiDomain($wiki));
         $results = [];
         foreach ($doc[$this->selectors['results']] as $result) {
             $pq = \pq($result);
             $url = $pq[$this->selectors['url']]->attr('href');
-            $urlDomain = strtolower(parse_url($url, PHP_URL_HOST));
-            if ($urlDomain === $domain) {
+            if ($this->isValidWikiArticle($wiki, $url)) {
                 $results[] = ImportedResult::createFromURL(
                     $this->source,
-                    $pq[$this->selectors['url']]->attr('href'),
+                    $url,
                     $pq[$this->selectors['snippet']]->text(),
                     count($results)
                 );
@@ -104,5 +97,41 @@ class HtmlResultGetter implements ResultGetterInterface
         }
 
         return $results;
+    }
+
+    /**
+     * @param string $wiki
+     * @return string
+     */
+    private function getWikiDomain($wiki)
+    {
+        return parse_url($this->wikis[$wiki], PHP_URL_HOST);
+    }
+
+    /**
+     * @param string $url
+     * @return bool
+     */
+    private function isValidWikiArticle($wiki, $url)
+    {
+
+        $parts = parse_url($url);
+
+        $domain = strtolower($this->getWikiDomain($wiki));
+        $urlDomain = strtolower($parts['host']);
+        if ($urlDomain !== $domain) {
+            return false;
+        }
+
+        if (strlen($parts['path']) > 6 && substr($parts['path'], 0, 6) === '/wiki/') {
+            return true;
+        }
+
+        if (empty($parts['query'])) {
+            return false;
+        }
+
+        parse_str($parts['query'], $query);
+        return !empty($query['title']);
     }
 }
