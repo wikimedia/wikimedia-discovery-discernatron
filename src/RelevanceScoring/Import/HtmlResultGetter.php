@@ -4,8 +4,8 @@ namespace WikiMedia\RelevanceScoring\Import;
 
 use GuzzleHTTP\Client;
 use GuzzleHttp\Promise\PromiseInterface;
-use phpQuery;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\DomCrawler\Crawler;
 use WikiMedia\RelevanceScoring\Exception\RuntimeException;
 
 class HtmlResultGetter implements ResultGetterInterface
@@ -73,28 +73,30 @@ class HtmlResultGetter implements ResultGetterInterface
             throw new RuntimeException('Failed search');
         }
 
-        $doc = phpQuery::newDocumentHTML(
-            (string) $response->getBody(),
-            'utf8'
-        );
+        $html = (string)$response->getBody();
+        $contentType = $response->hasHeader('Content-Type')
+            ? end($response->getHeader('Content-Type'))
+            : null;
 
-        if ($doc[$this->selectors['is_valid']]->count() === 0) {
+        $crawler = new Crawler();
+        $crawler->addContent($html, $contentType);
+
+        if ($crawler->filter($this->selectors['is_valid'])->count() === 0) {
             throw new RuntimeException('No results section');
         }
 
         $results = [];
-        foreach ($doc[$this->selectors['results']] as $result) {
-            $pq = \pq($result);
-            $url = $pq[$this->selectors['url']]->attr('href');
+        $crawler->filter($this->selectors['results'])->each(function($result) use (&$results, $wiki) {
+            $url = $result->filter($this->selectors['url'])->attr('href');
             if ($this->isValidWikiArticle($wiki, $url)) {
                 $results[] = ImportedResult::createFromURL(
                     $this->source,
                     $url,
-                    $pq[$this->selectors['snippet']]->text(),
+                    trim($result->filter($this->selectors['snippet'])->text()),
                     count($results)
                 );
             }
-        }
+        });
 
         return $results;
     }

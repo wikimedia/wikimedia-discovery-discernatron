@@ -6,7 +6,7 @@ use Doctrine\DBAL\Connection;
 use WikiMedia\OAuth\User;
 use WikiMedia\RelevanceScoring\Repository\UsersRepository;
 
-class BaseRepositoryTest extends \PHPUnit_Framework_TestCase
+abstract class BaseRepositoryTest extends \PHPUnit_Framework_TestCase
 {
     /** @var Connection */
     protected $db;

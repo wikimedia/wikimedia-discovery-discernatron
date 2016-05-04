@@ -157,6 +157,7 @@ class QueriesRepository
                 'user_id' => $user->uid,
                 'wiki' => $wiki,
                 'query' => $query,
+                'query_hash' => md5($query),
                 'created' => time(),
                 'imported' => $imported === 'imported',
             ]);
