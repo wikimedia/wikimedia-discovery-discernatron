@@ -29,7 +29,7 @@ class ScoresRepository
 
     public function storeQueryScores(User $user, $queryId, array $scores)
     {
-        $this->db->transactional(function() use ($user, $queryId, $scores) {
+        $this->db->transactional(function () use ($user, $queryId, $scores) {
             foreach ($scores as $resultId => $score) {
                 if ($score !== null) {
                     $this->storeQueryScore($user, $queryId, $resultId, $score);

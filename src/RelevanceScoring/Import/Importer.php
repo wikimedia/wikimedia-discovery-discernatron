@@ -36,11 +36,13 @@ class Importer
         $this->output = function () {};
     }
 
-    public function setOutput($callable) {
+    public function setOutput($callable)
+    {
         $this->output = $callable;
     }
 
-    private function output($line) {
+    private function output($line)
+    {
         $callable = $this->output;
         $callable($line);
     }

@@ -135,7 +135,8 @@ class QueriesController
     }
 
     /**
-     * @var string $wiki
+     * @param string $wiki
+     *
      * @return string
      */
     private function getBaseUrl($wiki)
@@ -190,6 +191,7 @@ class QueriesController
      * a local fisher yates implementation.
      *
      * @param array $array
+     *
      * @return array
      */
     private function shufflePreserveKeys(array $array, $seed)
@@ -205,14 +207,15 @@ class QueriesController
 
     /**
      * @param array $array Must be numerically indexed starting
-     *  from 0 with no gaps.
-     * @param int $seed
+     *                     from 0 with no gaps.
+     * @param int   $seed
+     *
      * @return array
      */
     private function fisherYatesShuffle(array $array, $seed)
     {
         mt_srand($seed);
-        for ($i = count($array) - 1; $i > 0; $i--) {
+        for ($i = count($array) - 1; $i > 0; --$i) {
             $j = mt_rand(0, $i);
             $tmp = $array[$i];
             $array[$i] = $array[$j];

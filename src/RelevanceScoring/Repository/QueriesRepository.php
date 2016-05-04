@@ -232,5 +232,4 @@ class QueriesRepository
             'query_id' => $queryId,
         ]);
     }
-
 }

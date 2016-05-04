@@ -73,7 +73,7 @@ class HtmlResultGetter implements ResultGetterInterface
             throw new RuntimeException('Failed search');
         }
 
-        $html = (string)$response->getBody();
+        $html = (string) $response->getBody();
         $contentType = $response->hasHeader('Content-Type')
             ? end($response->getHeader('Content-Type'))
             : null;
@@ -86,7 +86,7 @@ class HtmlResultGetter implements ResultGetterInterface
         }
 
         $results = [];
-        $crawler->filter($this->selectors['results'])->each(function($result) use (&$results, $wiki) {
+        $crawler->filter($this->selectors['results'])->each(function ($result) use (&$results, $wiki) {
             $url = $result->filter($this->selectors['url'])->attr('href');
             if ($this->isValidWikiArticle($wiki, $url)) {
                 $results[] = ImportedResult::createFromURL(
@@ -103,6 +103,7 @@ class HtmlResultGetter implements ResultGetterInterface
 
     /**
      * @param string $wiki
+     *
      * @return string
      */
     private function getWikiDomain($wiki)
@@ -112,11 +113,11 @@ class HtmlResultGetter implements ResultGetterInterface
 
     /**
      * @param string $url
+     *
      * @return bool
      */
     private function isValidWikiArticle($wiki, $url)
     {
-
         $parts = parse_url($url);
 
         $domain = strtolower($this->getWikiDomain($wiki));
@@ -134,6 +135,7 @@ class HtmlResultGetter implements ResultGetterInterface
         }
 
         parse_str($parts['query'], $query);
+
         return !empty($query['title']);
     }
 }

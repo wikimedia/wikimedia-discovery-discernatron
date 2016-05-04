@@ -3,7 +3,6 @@
 namespace WikiMedia\RelevanceScoring\Console;
 
 use Knp\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Twig_Environment;
@@ -27,7 +26,7 @@ class CacheClear extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->twig->clearCacheFiles();
-        $output->writeln("Cache cleared");
+        $output->writeln('Cache cleared');
 
         return 0;
     }

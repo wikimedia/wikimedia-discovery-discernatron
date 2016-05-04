@@ -19,7 +19,7 @@ class ImportedResult
      * @param string $source
      * @param string $title
      * @param string $snippet
-     * @param int $position
+     * @param int    $position
      */
     public function __construct($source, $title, $snippet, $position)
     {
@@ -48,6 +48,7 @@ class ImportedResult
             parse_str($query, $decoded);
             if (!empty($decoded['title'])) {
                 $title = strtr($decoded['title'], '_', ' ');
+
                 return new self($source, $title, $snippet, $position);
             }
         }
@@ -80,7 +81,7 @@ class ImportedResult
         if (strlen($this->snippet) === 0) {
             return 0;
         }
-        switch($this->source) {
+        switch ($this->source) {
         case 'google':
             return 100;
         case 'bing':

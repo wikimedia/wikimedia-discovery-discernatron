@@ -31,18 +31,19 @@ abstract class BaseRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @param int|null $id
+     *
      * @return User
      */
-    protected function genTestUser($id=null)
+    protected function genTestUser($id = null)
     {
         $user = new User();
         $user->uid = $id ?: 1234;
-        $user->name = 'testUser' . $user->uid;
+        $user->name = 'testUser'.$user->uid;
         $user->extra['editCount'] = 0;
-        
+
         $repo = new UsersRepository($this->db);
         $repo->updateUser($user);
-        
+
         return $user;
     }
 }

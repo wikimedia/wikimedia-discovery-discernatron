@@ -131,6 +131,7 @@ EOD;
         foreach ($results as $row) {
             $titles[$row['id']] = $row;
         }
+
         return new Some($titles);
     }
 
@@ -150,14 +151,14 @@ EOD;
         foreach ($results as $result) {
             $title = $result->getTitle();
             if (!isset($resultIds[$title])) {
-                 $affected = $this->db->insert('results', [
+                $affected = $this->db->insert('results', [
                     'query_id' => $queryId,
                     'title' => $title,
                     'title_hash' => md5($title),
                     'created' => $now,
                 ]);
                 if ($affected !== 1) {
-                    throw new RuntimeException('Expected 1 inserted row but got: ' . $affected);
+                    throw new RuntimeException('Expected 1 inserted row but got: '.$affected);
                 }
                 $resultIds[$title] = $this->db->lastInsertId();
                 echo "Created $title as {$resultIds[$title]}\n";
@@ -176,7 +177,7 @@ EOD;
                 'created' => $now,
             ]);
             if ($affected !== 1) {
-                throw new RuntimeException('Expected 1 inserted row but got: ' . $affected);
+                throw new RuntimeException('Expected 1 inserted row but got: '.$affected);
             }
         }
     }

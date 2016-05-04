@@ -2,12 +2,6 @@
 
 use WikiMedia\RelevanceScoring\Application;
 
-/**
- * Created by PhpStorm.
- * User: ebernhardson
- * Date: 4/20/16
- * Time: 3:23 PM
- */
 class ApplicationTest extends \PHPUnit_Framework_TestCase
 {
     public function instantiateProvider()
@@ -27,16 +21,18 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
                 $tests[] = [$app, $serviceId];
             }
         }
+
         return $tests;
     }
 
     /**
      * @dataProvider instantiateProvider
+     *
      * @param Application $app
-     * @param string $serviceId
+     * @param string      $serviceId
      */
     public function testInstantiate(Application $app, $serviceId)
     {
-            $app[$serviceId];
+        $app[$serviceId];
     }
 }

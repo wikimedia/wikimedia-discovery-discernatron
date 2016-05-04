@@ -18,13 +18,13 @@ class ResultsRepositoryTest extends BaseRepositoryTest
             $repo->storeResults($user, $queryId, [
                 new ImportedResult('unitTest', 'JFK', '', 1),
                 new ImportedResult('other', 'John F. Kennedy', '', 1),
-                new ImportedResult('other', 'JFK', '', 2)
+                new ImportedResult('other', 'JFK', '', 2),
             ]);
         });
-        
+
         $found = $repo->getQueryResults($queryId)->getOrElse([]);
         $this->assertCount(2, $found);
-        $titles = array_map(function($query) {
+        $titles = array_map(function ($query) {
             return $query['title'];
         }, $found);
         $this->assertContains('JFK', $titles);
@@ -41,7 +41,7 @@ class ResultsRepositoryTest extends BaseRepositoryTest
         $this->db->transactional(function () use ($repo, $user, $title, $snippet, &$queryId) {
             $queryId = $this->genQuery($user, 'starksy and hutch devil');
             $repo->storeResults($user, $queryId, [
-                new ImportedResult('unittest', $title, $snippet, 0)
+                new ImportedResult('unittest', $title, $snippet, 0),
             ]);
         });
 
@@ -61,6 +61,7 @@ class ResultsRepositoryTest extends BaseRepositoryTest
     private function genQuery(User $user, $query)
     {
         $repo = new QueriesRepository($this->db);
+
         return $repo->createQuery($user, 'unitTest', $query, true);
     }
 }

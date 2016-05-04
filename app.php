@@ -95,7 +95,7 @@ if ($app['debug']) {
 $app->before(function (Request $request) use ($app) {
     $uri = $request->getRequestUri();
     if ($uri === '/login' || substr($uri, 0, 7) === '/oauth/') {
-        return null;
+        return;
     }
     $session = $app['session'];
     $cred = $session->get('oauth.credentials');
@@ -123,7 +123,7 @@ $app->before(function (Request $request) use ($app) {
 
     $app['twig']->addGlobal('user', $user);
 
-    return null;
+    return;
 });
 
 $app->get('/', function () use ($app) {

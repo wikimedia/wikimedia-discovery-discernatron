@@ -13,7 +13,7 @@ class MinimumSubmitted extends Constraint
     public $minimum;
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getDefaultOption()
     {
@@ -21,7 +21,7 @@ class MinimumSubmitted extends Constraint
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getTargets()
     {
@@ -36,23 +36,22 @@ class MinimumSubmitted extends Constraint
 
         $percent = $this->percentageAsFloat();
         if ($percent !== null) {
-            return (int)ceil($have * $percent);
+            return (int) ceil($have * $percent);
         }
 
-        throw new ConstraintDefinitionException("Constraint must be an integer or a percentage between 0% and 100%");
+        throw new ConstraintDefinitionException('Constraint must be an integer or a percentage between 0% and 100%');
     }
 
     private function percentageAsFloat()
     {
         if (substr($this->minimum, -1) !== '%') {
-            return null;
+            return;
         }
         $percent = substr($this->minimum, 0, -1);
         if (ctype_digit($percent) && $percent > 0 && $percent <= 100) {
             return $percent / 100;
         }
 
-        return null;
+        return;
     }
 }
-

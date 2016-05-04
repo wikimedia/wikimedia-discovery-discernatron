@@ -6,7 +6,6 @@ use WikiMedia\RelevanceScoring\Import\ImportedResult;
 
 class ImportedResultTest extends \PHPUnit_Framework_TestCase
 {
-
     public function createFromURLProvider()
     {
         return array(

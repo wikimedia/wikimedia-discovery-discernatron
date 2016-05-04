@@ -4,7 +4,6 @@ namespace WikiMedia\RelevanceScoring\Import;
 
 class HtmlResultGetterTest extends \PHPUnit_Framework_TestCase
 {
-
     public static function somethingProvider()
     {
         $selectors = [
@@ -20,6 +19,7 @@ class HtmlResultGetterTest extends \PHPUnit_Framework_TestCase
                 $content .= "<li><a href='$url'>some text</a>";
                 $content .= "<p>$snippet</p></li>";
             }
+
             return "<html><head></head><body><ul>$content</ul></body></html>";
         };
 
@@ -69,7 +69,7 @@ class HtmlResultGetterTest extends \PHPUnit_Framework_TestCase
                     'Katsuhisa Hōki is a Japanese voice actor and actor from Nagasaki Prefecture. He is affiliated .... (2004) (Great Devil King); Pocket Monsters Advanced Generation the Movie: The Pokémon Ranger and Prince of the ... The Specialist (Joe Leon); Stargate SG-1 (George Hammond); Starsky and Hutch (Captain Harold Dobey) ...',
                     0
                 )],
-            ]
+            ],
         ];
     }
 
@@ -95,7 +95,6 @@ class HtmlResultGetterTest extends \PHPUnit_Framework_TestCase
             ->with('Content-Type')
             ->will($this->returnValue(['text/html; charset=UTF-8']));
 
-
         $getter = new HtmlResultGetter(
             $client,
             ['testwiki' => 'https://test.wikipedia.org/w/api.php'],
@@ -108,4 +107,3 @@ class HtmlResultGetterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $getter->handleResponse($response, 'testwiki', ''));
     }
 }
-
