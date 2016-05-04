@@ -2,10 +2,10 @@
 
 namespace WikiMedia\RelevanceScoring\Controller;
 
-use Application;
 use Twig_Environment;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use WikiMedia\RelevanceScoring\Application;
 use WikiMedia\RelevanceScoring\Repository\ScoresRepository;
 
 class ScoresController

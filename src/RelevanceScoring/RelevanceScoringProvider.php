@@ -2,10 +2,10 @@
 
 namespace WikiMedia\RelevanceScoring;
 
-use Application;
 use Silex\ControllerCollection;
 use Silex\ControllerProviderInterface;
 use Silex\ServiceProviderInterface;
+use WikiMedia\RelevanceScoring\Application;
 use WikiMedia\RelevanceScoring\Console\CacheClear;
 use WikiMedia\RelevanceScoring\Console\Import;
 use WikiMedia\RelevanceScoring\Console\ImportPending;

@@ -2,12 +2,12 @@
 
 namespace WikiMedia\OAuth;
 
-use Application;
 use Silex\ControllerProviderInterface;
 use Silex\ServiceProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Silex\ControllerCollection;
 use WikiMedia\OAuth\Exception\RuntimeException;
+use WikiMedia\RelevanceScoring\Application;
 
 class OAuthProvider implements ControllerProviderInterface, ServiceProviderInterface
 {

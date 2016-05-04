@@ -4,12 +4,10 @@ use Symfony\Component\HttpFoundation\Request;
 
 require_once __DIR__.'/vendor/autoload.php';
 
-class Application extends Silex\Application
-{
-    use Silex\Application\UrlGeneratorTrait;
-    use Silex\Application\TwigTrait;
-}
-$app = new Application();
+// @todo traits are convenient, but perhaps things would be a bit
+// cleaner to use native Silex App and be explicit about things we
+// currently access through the traits.
+$app = new WikiMedia\RelevanceScoring\Application();
 
 $app->register(new Silex\Provider\SessionServiceProvider());
 

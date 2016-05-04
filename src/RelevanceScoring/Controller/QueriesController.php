@@ -2,11 +2,11 @@
 
 namespace WikiMedia\RelevanceScoring\Controller;
 
-use Application;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Twig_Environment;
 use WikiMedia\OAuth\User;
+use WikiMedia\RelevanceScoring\Application;
 use WikiMedia\RelevanceScoring\Assert\MinimumSubmitted;
 use WikiMedia\RelevanceScoring\Repository\QueriesRepository;
 use WikiMedia\RelevanceScoring\Repository\ResultsRepository;

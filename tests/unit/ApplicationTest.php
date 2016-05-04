@@ -1,5 +1,7 @@
 <?php
 
+use WikiMedia\RelevanceScoring\Application;
+
 /**
  * Created by PhpStorm.
  * User: ebernhardson
