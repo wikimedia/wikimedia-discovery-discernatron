@@ -82,7 +82,7 @@
                             <span class="glyphicon glyphicon-chevron-up hide-snippet hidden"></span>
                             {{ child.vars.label }}
                             <small>
-                                <a href="{{ baseWikiUrl }}/{{ child.vars.label }}" target="_blank">link</a>
+                                <a href="{{ baseWikiUrl }}/{{ child.vars.label|url_encode }}" target="_blank">link</a>
                             </small>
                         </h5>
                         {% for choice in child %}
