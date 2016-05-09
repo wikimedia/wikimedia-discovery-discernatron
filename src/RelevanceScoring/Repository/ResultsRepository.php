@@ -142,6 +142,8 @@ EOD;
      * @param User|int         $user    User requesting the import
      * @param int              $queryId Query id to attach results to
      * @param ImportedResult[] $results Individual results to store
+     *
+     * @return int[] Map from title string to result id inserted
      */
     public function storeResults($user, $queryId, array $results)
     {
@@ -180,5 +182,7 @@ EOD;
                 throw new RuntimeException('Expected 1 inserted row but got: '.$affected);
             }
         }
+
+        return $resultIds;
     }
 }

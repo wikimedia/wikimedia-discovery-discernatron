@@ -2,9 +2,7 @@
 
 namespace WikiMedia\Test\RelevanceScoring\Repository;
 
-use WikiMedia\OAuth\User;
 use WikiMedia\RelevanceScoring\Import\ImportedResult;
-use WikiMedia\RelevanceScoring\Repository\QueriesRepository;
 use WikiMedia\RelevanceScoring\Repository\ResultsRepository;
 
 class ResultsRepositoryTest extends BaseRepositoryTest
@@ -50,18 +48,5 @@ class ResultsRepositoryTest extends BaseRepositoryTest
         $result = reset($found);
         $this->assertEquals($title, $result['title']);
         $this->assertEquals($snippet, $result['snippet']);
-    }
-
-    /**
-     * @param User $user
-     * @param $query
-     *
-     * @return int Id of generated query
-     */
-    private function genQuery(User $user, $query)
-    {
-        $repo = new QueriesRepository($this->db);
-
-        return $repo->createQuery($user, 'unitTest', $query, true);
     }
 }

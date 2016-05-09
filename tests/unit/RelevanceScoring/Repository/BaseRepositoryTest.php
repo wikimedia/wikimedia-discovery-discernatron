@@ -4,6 +4,8 @@ namespace WikiMedia\Test\RelevanceScoring\Repository;
 
 use Doctrine\DBAL\Connection;
 use WikiMedia\OAuth\User;
+use WikiMedia\RelevanceScoring\Repository\QueriesRepository;
+use WikiMedia\RelevanceScoring\Repository\ResultsRepository;
 use WikiMedia\RelevanceScoring\Repository\UsersRepository;
 
 abstract class BaseRepositoryTest extends \PHPUnit_Framework_TestCase
@@ -45,5 +47,27 @@ abstract class BaseRepositoryTest extends \PHPUnit_Framework_TestCase
         $repo->updateUser($user);
 
         return $user;
+    }
+
+    /**
+     * @param User $user
+     * @param $query
+     *
+     * @return int Id of generated query
+     */
+    protected function genQuery(User $user, $query)
+    {
+        $repo = new QueriesRepository($this->db);
+
+        return $repo->createQuery($user, 'unitTest', $query, true);
+    }
+
+    /**
+     */
+    protected function genResult(User $user, $queryId, array $results)
+    {
+        $repo = new ResultsRepository($this->db);
+
+        return $repo->storeResults($user, $queryId, $results);
     }
 }

@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS scores (
     user_id INTEGER UNSIGNED NOT NULL,
     result_id INTEGER UNSIGNED NOT NULL,
     query_id INTEGER UNSIGNED NOT NULL,
-    score TINYINT UNSIGNED NOT NULL,
+    score TINYINT UNSIGNED,
     created INTEGER UNSIGNED NOT NULL,
     FOREIGN KEY `scores_user_id` (user_id) REFERENCES users(id),
     FOREIGN KEY `scores_result_id` (result_id) REFERENCES results(id),

@@ -118,8 +118,7 @@ class QueriesController
         $form->handleRequest($request);
 
         if ($form->isValid()) {
-            $data = $form->getData();
-            $this->scoresRepo->storeQueryScores($this->user, $id, $data);
+            $this->scoresRepo->storeQueryScores($this->user, $id, $form->getData());
 
             return $this->app->redirect($this->app->path('random_query', ['saved' => 1]));
         }

@@ -16,24 +16,52 @@ class ScoresRepository
         $this->db = $db;
     }
 
+    /**
+     * @param User     $user
+     * @param int      $queryId
+     * @param int      $resultId
+     * @param int|null $score
+     *
+     * @return int
+     */
     public function storeQueryScore(User $user, $queryId, $resultId, $score)
     {
-        $this->db->insert('scores', [
+        $row = [
             'user_id' => $user->uid,
             'result_id' => $resultId,
             'query_id' => $queryId,
             'score' => $score,
             'created' => time(),
-        ]);
+        ];
+        $affected = $this->db->insert('scores', $row);
+        if ($affected !== 1) {
+            throw new \RuntimeException('Failed inserting row');
+        }
+
+        return $this->db->lastInsertId();
+    }
+
+    public function getScoresForQuery($queryId)
+    {
+        $qb = $this->db->createQueryBuilder()
+            ->select('id', 'user_id', 'result_id', 'score', 'created')
+            ->from('scores', 's')
+            ->where('query_id = ?')
+            ->setParameter(0, $queryId);
+
+        $res = $qb->execute()->fetchAll();
+        if ($res === false) {
+            throw new RuntimeException('Query Failure');
+        }
+
+        return $res;
     }
 
     public function storeQueryScores(User $user, $queryId, array $scores)
     {
         $this->db->transactional(function () use ($user, $queryId, $scores) {
             foreach ($scores as $resultId => $score) {
-                if ($score !== null) {
-                    $this->storeQueryScore($user, $queryId, $resultId, $score);
-                }
+                $this->storeQueryScore($user, $queryId, $resultId, $score);
             }
         });
     }
