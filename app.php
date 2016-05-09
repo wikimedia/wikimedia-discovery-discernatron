@@ -93,6 +93,12 @@ if ($app['debug']) {
 
 // bare bones authentication / firewall
 $app->before(function (Request $request) use ($app) {
+    if (isset($app['canonical_domain'])) {
+        if (strtolower($request->getHost()) !== strtolower($app['canonical_domain'])) {
+            return $app->redirect('https://'.$app['canonical_domain']);
+        }
+    }
+
     $uri = $request->getRequestUri();
     if ($uri === '/login' || substr($uri, 0, 7) === '/oauth/') {
         return;
