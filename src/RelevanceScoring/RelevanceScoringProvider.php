@@ -88,7 +88,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                 'https://www.bing.com/search',
                 [
                     'is_valid' => '#b_results',
-                    'results' => '#b_results .b_algo',
+                    'results' => '#b_results > .b_algo',
                     'url' => 'h2 a',
                     'snippet' => '.b_caption p',
                 ],
