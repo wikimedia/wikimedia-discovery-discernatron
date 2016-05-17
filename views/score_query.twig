@@ -68,6 +68,11 @@
 
     <div class="row"><h3>Results</h3></div>
 
+    <div class="row">
+        <a class="btn btn-default hidden show-all-snippets">Show all snippets</a>
+        <a class="btn btn-default hidden hide-all-snippets">Hide all snippets</a>
+    </div>
+
     <form method="post" novalidate>
         {{ form_errors(form) }}
         {{ form_widget(form._token) }}
@@ -93,7 +98,7 @@
                         {% endfor %}
                         <div class="hidden-md hidden-lg rating col-md-2 click-for-next text-center"></div>
                     </div>
-                    <div class="row snippet hidden">
+                    <div class="row snippet">
                         <blockquote class="col-md-9">
                             <p>{{ results[child.vars.name].snippet }}</p>
                         </blockquote>

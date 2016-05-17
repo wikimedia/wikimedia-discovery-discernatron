@@ -39,22 +39,36 @@
                 onChange.apply(row.find('input[value=' + (next) + ']').prop('checked', true));
             }
         },
-        onShowSnippet = function (evt) {
-            $(this).toggle(false);
-            $(this).siblings('.hide-snippet').removeClass('hidden').toggle(true);
-            $(this).closest('.result').find('.snippet').removeClass('hidden').toggle(true);
+        showSnippet = function ($target) {
+            $target.toggle(false);
+            $target.siblings('.hide-snippet').toggle(true);
+            $target.closest('.result').find('.snippet').toggle(true);
         },
-        onHideSnippet = function (evt) {
-            $(this).toggle(false);
-            $(this).siblings('.show-snippet').toggle(true);
-            $(this).closest('.result').find('.snippet').toggle(false);
+        hideSnippet = function ($target) {
+            $target.toggle(false);
+            $target.siblings('.show-snippet').removeClass('hidden').toggle(true);
+            $target.closest('.result').find('.snippet').toggle(false);
         };
     
     $(document).ready(function () {
         $('input:checked').each(onChange);
         $('input[type=radio]').change(onChange);
         $('.click-for-next').click(onClickForNext);
-        $('.show-snippet').removeClass('hidden').click(onShowSnippet);
-        $('.hide-snippet').click(onHideSnippet);
+        $('.show-snippet').click(function () {
+            showSnippet($(this));
+        });
+        $('.show-all-snippets').click(function () {
+            showSnippet($('.show-snippet'));
+            $(this).toggle(false);
+            $('.hide-all-snippets').toggle(true);
+        });
+        $('.hide-snippet').removeClass('hidden').click(function () {
+            hideSnippet($(this));
+        });
+        $('.hide-all-snippets').removeClass('hidden').click(function () {
+            hideSnippet($('.hide-snippet'));
+            $(this).toggle(false);
+            $('.show-all-snippets').removeClass('hidden').toggle(true);
+        });
     });
 }(jQuery));
