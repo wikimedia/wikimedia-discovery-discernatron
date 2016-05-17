@@ -6,18 +6,23 @@ use Doctrine\DBAL\Connection;
 use PlasmaConduit\option\None;
 use PlasmaConduit\option\Option;
 use PlasmaConduit\option\Some;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\NullLogger;
 use WikiMedia\OAuth\User;
 use WikiMedia\RelevanceScoring\Exception\RuntimeException;
 use WikiMedia\RelevanceScoring\Import\ImportedResult;
 
 class ResultsRepository
 {
+    use LoggerAwareTrait;
+
     /** @var Connection */
     private $db;
 
     public function __construct(Connection $db)
     {
         $this->db = $db;
+        $this->logger = new NullLogger();
     }
 
     /**
@@ -163,11 +168,11 @@ EOD;
                     throw new RuntimeException('Expected 1 inserted row but got: '.$affected);
                 }
                 $resultIds[$title] = $this->db->lastInsertId();
-                echo "Created $title as {$resultIds[$title]}\n";
+                $this->logger->debug("Created $title as {$resultIds[$title]}");
             }
         }
         foreach ($results as $result) {
-            echo "Inserting {$result->getSource()}: {$resultIds[$result->getTitle()]} {$result->getTitle()}\n";
+            $this->logger->debug("Inserting {$result->getSource()}: {$resultIds[$result->getTitle()]} {$result->getTitle()}");
             $affected = $this->db->insert('results_sources', [
                 'query_id' => $queryId,
                 'results_id' => $resultIds[$result->getTitle()],

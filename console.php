@@ -2,6 +2,11 @@
 <?php
 
 $app = require __DIR__.'/app.php';
+$app->extend('search.logger', function ($logger) {
+    $logger->pushHandler(new Monolog\Handler\StreamHandler('php://stderr'));
+
+    return $logger;
+});
 $app->register(new Knp\Provider\ConsoleServiceProvider(), [
     'console.name' => 'Wikimedia Relevance Scorer',
     'console.version' => '0.0.1',

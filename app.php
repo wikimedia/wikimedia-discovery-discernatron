@@ -77,6 +77,14 @@ $app['console.commands'] = function () {
     return [];
 };
 
+// By default (web reqs) the logger isn't hooked up to any output. Additionally
+// search.logger is used rather than logger to prevent silex/symfony from
+// logging through it. `console.php` pushes a handler which sends this output
+// to stderr.
+$app['search.logger'] = function () {
+    return new Monolog\Logger('search');
+};
+
 $ini = parse_ini_file(__DIR__.'/app.ini');
 foreach ($ini as $key => $value) {
     $app[$key] = $value;
