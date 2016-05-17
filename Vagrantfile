@@ -5,7 +5,7 @@ Vagrant.configure("2") do |config|
         override.vm.box_url = 'https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box'
         override.vm.box_download_insecure = true
         override.vm.network "private_network", ip: "192.168.33.10"
-        override.vm.synced_folder ".", "/vagrant", :mount_options => ["dmode=777", "fmode=666"]
+        override.vm.synced_folder ".", "/vagrant", :mount_options => ["dmode=777"]
     end
 
     config.vm.provider :lxc do |_lxc, override|
