@@ -2,6 +2,7 @@
 .*.sw?
 /app.db
 /app.ini
+/app.debug.php
 /public/vendor/bootstrap
 /composer.lock
 /cache

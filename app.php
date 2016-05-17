@@ -153,4 +153,9 @@ $app->get('/logout', function () use ($app) {
 })
 ->bind('logout');
 
+// Place for local hacks
+if (file_exists(__DIR__.'/app.debug.php')) {
+    require __DIR__.'/app.debug.php';
+}
+
 return $app;
