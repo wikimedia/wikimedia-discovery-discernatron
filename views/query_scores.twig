@@ -2,22 +2,28 @@
 
 {% block content %}
     <h3>Scores</h3>
+
+    <dl class="dl-horizontal">
+        <dt>wiki</dt>
+        <dd>{{ query.wiki }}</dd>
+        <dt>query</dt>
+        <dd>{{ query.query }}</dd>
+    </dl>
+
     <table class="table table-striped">
         <thead>
             <tr>
-                <td>wiki</td>
-                <td>query</td>
                 <td>title</td>
-                <td>score</td>
+                <td>your score</td>
+                <td>avg score</td>
                 <td>num scores</td>
             </tr>
         </thead>
         <tbody>
             {% for score in scores %}
                 <tr>
-                    <td>{{ score.wiki }}</td>
-                    <td>{{ score.query }}</td>
                     <td>{{ score.title }}</td>
+                    <td>{% if score.user_score is null %}unrated{% else %}{{ score.user_score }}{% endif %}</td>
                     <td>{% if score.score is null %}unrated{% else %}{{ score.score }}{% endif %}</td>
                     <td>{{ score.num_scores }}</td>
                 </tr>

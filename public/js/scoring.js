@@ -4,7 +4,7 @@
             var $this = $(this),
                 value = parseInt($this.val()),
                 $row = $this.closest('.row');
-    
+
             $row.removeClass(valueToClass.join(' '));
             if (!isNaN(value)) {
                 $row.addClass(valueToClass[value]);
@@ -18,14 +18,20 @@
             var next,
                 row = $(this).closest('.row'),
                 selected = parseInt(row.find('input:checked').val()),
-                skip = 'label, input, a, .glyphicon';
-    
+                skip = 'label, input, a, .glyphicon',
+                // is there a better way? evt.toElement was missing in some FF
+                // versions. this is the element the event was bound to, not the
+                // one that was clicked.
+                $target = $(evt.toElement ||
+                            (evt.originalEvent && evt.originalEvent.target) ||
+                            this);
+
             // Don't override real clicks. We have to check originalEvent because toElement
             // isn't populated in firefox 46
-            if ($(evt.toElement).is(skip) || $(evt.originalEvent.target).is(skip)) {
+            if ($target.is(skip)) {
                 return;
             }
-    
+
             // if nothing selected default to last so we wrap to beginning
             if (isNaN(selected)) {
                 selected = 4;
@@ -49,7 +55,7 @@
             $target.siblings('.show-snippet').removeClass('hidden').toggle(true);
             $target.closest('.result').find('.snippet').toggle(false);
         };
-    
+
     $(document).ready(function () {
         $('input:checked').each(onChange);
         $('input[type=radio]').change(onChange);

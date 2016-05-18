@@ -1,0 +1,22 @@
+{% extends "layout.twig" %}
+
+{% block content %}
+<div class="row"><h3>All scored queries</h3></div>
+
+{% if next_page %}
+    <div class="row"><p><a class="btn btn-default" href="{{ next_page }}">Next Page</a></p></div>
+{% endif %}
+
+<div class="row">
+    <ul class="scored">
+        {% for query in queries %}
+            <li><a href="{{ path('query_scores', {'id': query.id}) }}">
+                {{ query.wiki }} - {{ query.query }}
+            </a></li>
+        {% endfor %}
+    </ul>
+</div>
+{% if next_page %}
+    <div class="row"><p><a class="btn btn-default" href="{{ next_page }}">Next Page</a></p></div>
+{% endif %}
+{% endblock %}

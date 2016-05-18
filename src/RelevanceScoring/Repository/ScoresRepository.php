@@ -41,15 +41,43 @@ class ScoresRepository
         return $this->db->lastInsertId();
     }
 
+    public function getScoredQueries(User $user, $startingAtId = 0, $limit = 20)
+    {
+
+        // @todo calculate the mediawiki dcg?
+        $qb = $this->db->createQueryBuilder()
+            ->select('DISTINCT q.id, q.wiki, q.query')
+            ->from('queries', 'q')
+            ->join('q', 'scores', 's', 's.query_id = q.id AND s.user_id = :userId')
+            ->setParameter('userId', $user->uid)
+            ->groupBy('q.id', 'q.wiki', 'q.query')
+            ->orderBy('q.id', 'ASC')
+            ->setMaxResults($limit);
+
+        if ($startingAtId > 0) {
+            $qb->where('q.id >= :startingAtId')
+                ->setParameter('startingAtId', $startingAtId);
+        }
+
+        return $qb->execute()->fetchAll() ?: [];
+    }
+
     public function getScoresForQuery($queryId)
     {
-        $qb = $this->db->createQueryBuilder()
-            ->select('id', 'user_id', 'result_id', 'score', 'created')
-            ->from('scores', 's')
-            ->where('query_id = ?')
-            ->setParameter(0, $queryId);
+        $sql = <<<EOD
+SELECT r.title,
+	   AVG(s.score) as score,
+       u_s.score as user_score,
+       SUM(IF(s.score IS NULL, 0, 1)) as num_scores
+  FROM results r
+  JOIN scores s ON s.result_id = r.id
+  LEFT OUTER JOIN scores u_s ON u_s.result_id = r.id
+ WHERE s.query_id = ?
+ GROUP BY s.result_id
+ ORDER BY AVG(s.score) DESC
+EOD;
 
-        $res = $qb->execute()->fetchAll();
+        $res = $this->db->fetchAll($sql, [$queryId]);
         if ($res === false) {
             throw new RuntimeException('Query Failure');
         }
@@ -70,11 +98,10 @@ class ScoresRepository
     {
         $sql = <<<EOD
 SELECT AVG(s.score) as score,
-       COUNT(1) as num_scores,
+       SUM(IF(s.score IS NULL, 0, 1)) as num_scores,
        q.wiki as wiki,
        q.query as query,
-       r.title as title,
-       r.namespace as namespace
+       r.title as title
   FROM scores s
   JOIN results r ON r.id = s.result_id
   JOIN queries q ON q.id = r.query_id

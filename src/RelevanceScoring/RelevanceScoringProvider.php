@@ -33,8 +33,10 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
         $controllers->match('/import/query', 'search.controller.import:importQuery')
             ->bind('import_query');
 
-        $controllers->get('/scores', 'search.controller.scores:scores')
+        $controllers->get('/scores', 'search.controller.scores:scoredQueries')
             ->bind('scores');
+        $controllers->get('/scores/{id}', 'search.controller.scores:scoresByQueryId')
+            ->bind('query_scores');
 
         $controllers->get('/instructions',      'search.controller.queries:instructions')
             ->bind('instructions');
@@ -227,7 +229,9 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
         $app['search.controller.scores'] = function () use ($app) {
             return new ScoresController(
                 $app,
+                $app['session']->get('user'),
                 $app['twig'],
+                $app['search.repository.queries'],
                 $app['search.repository.scores']
             );
         };
