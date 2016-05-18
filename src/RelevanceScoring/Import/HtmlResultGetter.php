@@ -15,6 +15,8 @@ class HtmlResultGetter implements ResultGetterInterface
     private $source;
     private $url;
     private $selectors;
+    private $highlightStart;
+    private $highlightEnd;
     private $extraQueryParams;
 
     /**
@@ -23,6 +25,10 @@ class HtmlResultGetter implements ResultGetterInterface
      * @param string                $source
      * @param string                $url
      * @param array<string, string> $selectors
+     * @param string                $highlightStart   Marker that signifies the beginning of
+     *                                                highlighted snippet text.
+     * @param string                $highlightEnd     Marker that signifies the end of
+     *                                                highlighted snippet text.
      * @param array<string, string> $extraQueryParams
      */
     public function __construct(
@@ -31,6 +37,8 @@ class HtmlResultGetter implements ResultGetterInterface
         $source,
         $url,
         array $selectors,
+        $highlightStart,
+        $highlightEnd,
         array $extraQueryParams = array()
     ) {
         $this->http = $http;
@@ -38,6 +46,8 @@ class HtmlResultGetter implements ResultGetterInterface
         $this->source = $source;
         $this->url = $url;
         $this->selectors = $selectors;
+        $this->highlightStart = $highlightStart;
+        $this->highlightEnd = $highlightEnd;
         $this->extraQueryParams = $extraQueryParams;
     }
 
@@ -86,13 +96,13 @@ class HtmlResultGetter implements ResultGetterInterface
         }
 
         $results = [];
-        $crawler->filter($this->selectors['results'])->each(function ($result) use (&$results, $wiki) {
+        $crawler->filter($this->selectors['results'])->each(function ($result) use (&$results, $wiki, $contentType) {
             $url = $result->filter($this->selectors['url'])->attr('href');
             if ($this->isValidWikiArticle($wiki, $url)) {
                 $results[] = ImportedResult::createFromURL(
                     $this->source,
                     $url,
-                    trim($result->filter($this->selectors['snippet'])->text()),
+                    $this->extractSnippet($result, $contentType),
                     count($results)
                 );
             }
@@ -112,9 +122,11 @@ class HtmlResultGetter implements ResultGetterInterface
     }
 
     /**
-     * @param string $url
+     * @param string $wiki The wiki the url should belong to
+     * @param string $url  The url to check
      *
-     * @return bool
+     * @return bool True is the provided URL looks like a url
+     *              for an article on the provided wiki
      */
     private function isValidWikiArticle($wiki, $url)
     {
@@ -137,5 +149,32 @@ class HtmlResultGetter implements ResultGetterInterface
         parse_str($parts['query'], $query);
 
         return !empty($query['title']);
+    }
+
+    /**
+     * @param DOMCrawler $result      Crawler instance containing a single
+     *                                search result.
+     * @param string     $contentType The content type of the result
+     *
+     * @return string Sanitized HTML string containing only tags for bold
+     *                open and close
+     */
+    private function extractSnippet(Crawler $result, $contentType)
+    {
+        // Pull html from the result
+        $html = $result->filter($this->selectors['snippet'])->html();
+        // Replace start and end of bolded portions with custom markers
+        $replaced = strtr($html, [
+            $this->highlightStart => ImportedResult::START_HIGHLIGHT_MARKER,
+            $this->highlightEnd => ImportedResult::END_HIGHLIGHT_MARKER,
+        ]);
+
+        // convert html -> plaintext. Perhaps slower than necessary, but is
+        // safer than stringing together some function ourself.
+        $c = new Crawler();
+        // UTF-8 might be a bold assumption...
+        $c->addContent($replaced, $contentType);
+
+        return trim($c->text());
     }
 }

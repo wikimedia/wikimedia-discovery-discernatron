@@ -21,6 +21,9 @@
 .snippet {
     padding-left: 1em;
 }
+.snippet em {
+	font-weight: bold;
+}
 @media (max-width: 768px) {
     .border-xs {
         border: 1px solid black;

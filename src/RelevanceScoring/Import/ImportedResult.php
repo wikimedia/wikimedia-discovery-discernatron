@@ -4,6 +4,10 @@ namespace WikiMedia\RelevanceScoring\Import;
 
 class ImportedResult
 {
+    // @todo replace with unprintable unicode characters
+    const START_HIGHLIGHT_MARKER = "\xee\x80\x80"; // \uE000
+    const END_HIGHLIGHT_MARKER = "\xee\x80\x81"; // \uE001
+
     /** @var string */
     private $source;
     /** @var string */

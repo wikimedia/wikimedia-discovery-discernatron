@@ -4,7 +4,7 @@ namespace WikiMedia\RelevanceScoring\Import;
 
 class HtmlResultGetterTest extends \PHPUnit_Framework_TestCase
 {
-    public static function somethingProvider()
+    public static function responseHandlingProvider()
     {
         $selectors = [
             'is_valid' => 'body',
@@ -22,6 +22,9 @@ class HtmlResultGetterTest extends \PHPUnit_Framework_TestCase
 
             return "<html><head></head><body><ul>$content</ul></body></html>";
         };
+
+        $start = ImportedResult::START_HIGHLIGHT_MARKER;
+        $end = ImportedResult::END_HIGHLIGHT_MARKER;
 
         return [
             'simple wiki article' => [
@@ -66,7 +69,19 @@ class HtmlResultGetterTest extends \PHPUnit_Framework_TestCase
                 [new ImportedResult(
                     'unittest',
                     'Katsuhisa Hōki',
-                    'Katsuhisa Hōki is a Japanese voice actor and actor from Nagasaki Prefecture. He is affiliated .... (2004) (Great Devil King); Pocket Monsters Advanced Generation the Movie: The Pokémon Ranger and Prince of the ... The Specialist (Joe Leon); Stargate SG-1 (George Hammond); Starsky and Hutch (Captain Harold Dobey) ...',
+                    "Katsuhisa Hōki is a Japanese voice actor and actor from Nagasaki Prefecture. He is affiliated .... (2004) (Great {$start}Devil{$end} King); Pocket Monsters Advanced Generation the Movie: The Pokémon Ranger and Prince of the ... The Specialist (Joe Leon); Stargate SG-1 (George Hammond); {$start}Starsky and Hutch{$end} (Captain Harold Dobey) ...",
+                    0
+                )],
+            ],
+            'converts snippet highlighting' => [
+                $selectors,
+                $genHtml([
+                    'https://test.wikipedia.org/wiki/Airplane' => '<a>some <em>bold</em> text</a>',
+                ]),
+                [new ImportedResult(
+                    'unittest',
+                    'Airplane',
+                    "some {$start}bold{$end} text",
                     0
                 )],
             ],
@@ -74,36 +89,27 @@ class HtmlResultGetterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider somethingProvider
+     * @dataProvider responseHandlingProvider
      */
-    public function testSomething(array $selectors, $html, $expected)
+    public function testResponseHandling(array $selectors, $html, $expected)
     {
         $client = $this->getMock('GuzzleHTTP\\Client');
-        $response = $this->getMock('Psr\\Http\\Message\\ResponseInterface');
-        $response->expects($this->any())
-            ->method('getStatusCode')
-            ->will($this->returnValue(200));
-        $response->expects($this->any())
-            ->method('getBody')
-            ->will($this->returnValue($html));
-        $response->expects($this->any())
-            ->method('hasHeader')
-            ->with('Content-Type')
-            ->will($this->returnValue(true));
-        $response->expects($this->any())
-            ->method('getHeader')
-            ->with('Content-Type')
-            ->will($this->returnValue(['text/html; charset=UTF-8']));
-
         $getter = new HtmlResultGetter(
             $client,
             ['testwiki' => 'https://test.wikipedia.org/w/api.php'],
             'unittest',
             'https://test.wikipedia.org/w/index.php',
             $selectors,
+            '<em>',
+            '</em>',
             []
         );
 
+        $response = new \GuzzleHttp\Psr7\Response(
+            200,
+            ['Content-Type' => 'text/html; charset=UTF-8'],
+            $html
+        );
         $this->assertEquals($expected, $getter->handleResponse($response, 'testwiki', ''));
     }
 }

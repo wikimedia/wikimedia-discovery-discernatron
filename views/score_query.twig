@@ -100,7 +100,7 @@
                     </div>
                     <div class="row snippet">
                         <blockquote class="col-md-9">
-                            <p>{{ results[child.vars.name].snippet }}</p>
+                            <p>{{ results[child.vars.name].snippet|highlight_snippet }}</p>
                         </blockquote>
                     </div>
                 </div>

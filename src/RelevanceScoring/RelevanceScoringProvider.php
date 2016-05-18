@@ -59,6 +59,12 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
         $this->registerImporter($app);
         $this->registerConsole($app);
         $this->registerControllers($app);
+
+        $app->extend('twig', function (\Twig_Environment $twig) {
+            $twig->addExtension(new RelevanceScoringTwigExtension());
+
+            return $twig;
+        });
     }
 
     private function registerRepositories(Application $app)
@@ -95,6 +101,8 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                     'url' => 'h2 a',
                     'snippet' => '.b_caption p',
                 ],
+                '<strong>',
+                '</strong>',
                 [
                     'count' => $app['search.importer_limit'],
                 ]
@@ -112,6 +120,8 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                     'url' => 'h3 a',
                     'snippet' => '.st',
                 ],
+                '<em>',
+                '</em>',
                 [
                     // google white lists a specific set of numbers
                     'num' => array_reduce([100, 50, 40, 30, 20, 10], function ($a, $b) use ($app) {
@@ -135,7 +145,9 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                     'results' => '#links .web-result',
                     'url' => 'a',
                     'snippet' => '.snippet, .result__snippet',
-                ]
+                ],
+                '<b>',
+                '</b>'
             );
         };
         $app['search.importer.mediawiki'] = function () use ($app) {

@@ -7,6 +7,13 @@ use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\ResponseInterface;
 use WikiMedia\RelevanceScoring\Exception\RuntimeException;
 
+/**
+ * @TODO Is there any benefit of maintaining this on it's own?
+ * Could probably just setup an HtmlResultGetter configuration.
+ * That would also ensure we get the same behaviour as a typical
+ * user rather than having to make sure appropriate api flags
+ * are set to mimic web search
+ */
 class MediaWikiResultGetter implements ResultGetterInterface
 {
     /** @var Client */
@@ -74,11 +81,24 @@ class MediaWikiResultGetter implements ResultGetterInterface
             $results[] = new ImportedResult(
                 $wiki,
                 $result['title'],
-                html_entity_decode(strip_tags($result['snippet'])),
+                $this->convertSnippet($result['snippet']),
                 count($results)
             );
         }
 
         return $results;
+    }
+
+    private function convertSnippet($snippetHtml)
+    {
+        $replaced = strtr($snippetHtml, [
+            '<span class="searchmatch">' => ImportedResult::START_HIGHLIGHT_MARKER,
+            '</span>' => ImportedResult::END_HIGHLIGHT_MARKER,
+        ]);
+
+        $c = new \Symfony\Component\DomCrawler\Crawler();
+        $c->addContent($replaced, 'text/html; charset=UTF-8');
+
+        return trim($c->text());
     }
 }
