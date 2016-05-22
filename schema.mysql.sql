@@ -61,3 +61,14 @@ CREATE TABLE IF NOT EXISTS queries_skipped (
     FOREIGN KEY `queries_skipped_query_id` (query_id) REFERENCES queries(id),
     UNIQUE KEY `queries_skipped_user_query` (`user_id`, `query_id`)
 ) CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS `scoring_queue` (
+    id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INTEGER UNSIGNED,
+    query_id INTEGER UNSIGNED NOT NULL,
+    priority INTEGER UNSIGNED NOT NULL,
+    last_assigned INTEGER UNSIGNED,
+    FOREIGN KEY `queries_skipped_user_id` (user_id) REFERENCES users(id),
+    FOREIGN KEY `queries_skipped_query_id` (query_id) REFERENCES queries(id),
+    KEY `last_assigned_sort_key` (`last_assigned`, `query_id`),
+    KEY `scoring_queue_priority` (`priority`, `query_id`)
+) CHARSET=utf8mb4;

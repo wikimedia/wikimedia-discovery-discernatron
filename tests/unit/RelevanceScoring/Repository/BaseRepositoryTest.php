@@ -22,7 +22,10 @@ abstract class BaseRepositoryTest extends \PHPUnit_Framework_TestCase
         $dbOptions['dbname'] = 'relevance_test';
         $app['db.options'] = $dbOptions;
 
-        $tables = ['users', 'queries', 'results', 'results_sources', 'scores'];
+        $tables = [
+            'users', 'queries', 'results', 'scores',
+            'results_sources', 'scoring_queue',
+        ];
         $this->db = $app['db'];
         $this->db->exec('SET FOREIGN_KEY_CHECKS = 0');
         foreach ($tables as $table) {
@@ -39,7 +42,7 @@ abstract class BaseRepositoryTest extends \PHPUnit_Framework_TestCase
     protected function genTestUser($id = null)
     {
         $user = new User();
-        $user->uid = $id ?: 1234;
+        $user->uid = $id ?: mt_rand();
         $user->name = 'testUser'.$user->uid;
         $user->extra['editCount'] = 0;
 

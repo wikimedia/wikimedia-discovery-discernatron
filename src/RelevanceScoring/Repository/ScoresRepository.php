@@ -23,6 +23,8 @@ class ScoresRepository
      * @param int|null $score
      *
      * @return int
+     *
+     * @throws RuntimeException
      */
     public function storeQueryScore(User $user, $queryId, $resultId, $score)
     {
@@ -35,12 +37,45 @@ class ScoresRepository
         ];
         $affected = $this->db->insert('scores', $row);
         if ($affected !== 1) {
-            throw new \RuntimeException('Failed inserting row');
+            throw new RuntimeException('Failed inserting row');
         }
 
         return $this->db->lastInsertId();
     }
 
+    public function getNumberOfScores(array $queryIds)
+    {
+        $sql = <<<EOD
+SELECT query_id, count(distinct user_id) as count
+  FROM scores s
+ WHERE query_id IN (:ids)
+ GROUP BY query_id
+EOD;
+
+        $res = $this->db->fetchAll(
+            $sql,
+            ['ids' => $queryIds],
+            ['ids' => Connection::PARAM_INT_ARRAY]
+        );
+        if ($res === false) {
+            throw new RuntimeException('Query Failure');
+        }
+
+        $byQueryId = [];
+        foreach ($res as $row) {
+            $byQueryId[$row['query_id']] = $row['count'];
+        }
+
+        return $byQueryId;
+    }
+
+    /**
+     * @param User $user
+     * @param int  $startingAtId
+     * @param int  $limit
+     *
+     * @return array
+     */
     public function getScoredQueries(User $user, $startingAtId = 0, $limit = 20)
     {
 
@@ -62,6 +97,13 @@ class ScoresRepository
         return $qb->execute()->fetchAll() ?: [];
     }
 
+    /**
+     * @param int $queryId
+     *
+     * @return array
+     *
+     * @throws RuntimeException
+     */
     public function getScoresForQuery($queryId)
     {
         $sql = <<<EOD
@@ -85,6 +127,11 @@ EOD;
         return $res;
     }
 
+    /**
+     * @param User  $user
+     * @param int   $queryId
+     * @param array $scores
+     */
     public function storeQueryScores(User $user, $queryId, array $scores)
     {
         $this->db->transactional(function () use ($user, $queryId, $scores) {
@@ -94,6 +141,9 @@ EOD;
         });
     }
 
+    /**
+     * @return array
+     */
     public function getAll()
     {
         $sql = <<<EOD
@@ -118,7 +168,7 @@ EOD;
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws RuntimeException
      *
      * @todo make not suck
      */

@@ -11,6 +11,7 @@ class ResultsRepositoryTest extends BaseRepositoryTest
     {
         $user = $this->genTestUser();
         $repo = new ResultsRepository($this->db);
+        $queryId = null;
         $this->db->transactional(function () use ($repo, $user, &$queryId) {
             $queryId = $this->genQuery($user, 'JFK');
             $repo->storeResults($user, $queryId, [
@@ -36,6 +37,7 @@ class ResultsRepositoryTest extends BaseRepositoryTest
 
         $user = $this->genTestUser();
         $repo = new ResultsRepository($this->db);
+        $queryId = null;
         $this->db->transactional(function () use ($repo, $user, $title, $snippet, &$queryId) {
             $queryId = $this->genQuery($user, 'starksy and hutch devil');
             $repo->storeResults($user, $queryId, [

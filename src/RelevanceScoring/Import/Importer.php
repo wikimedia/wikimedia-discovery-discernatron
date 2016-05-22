@@ -7,13 +7,16 @@ use WikiMedia\OAuth\User;
 use WikiMedia\RelevanceScoring\Exception\RuntimeException;
 use WikiMedia\RelevanceScoring\Repository\QueriesRepository;
 use WikiMedia\RelevanceScoring\Repository\ResultsRepository;
+use WikiMedia\RelevanceScoring\Repository\ScoringQueueRepository;
 
 class Importer
 {
     private $db;
     private $queriesRepo;
     private $resultsRepo;
+    private $scoringQueueRepo;
     private $wikis;
+    private $getters;
     private $resultsPerSource = 25;
 
     /**
@@ -25,12 +28,14 @@ class Importer
         Connection $db,
         QueriesRepository $queriesRepo,
         ResultsRepository $resultsRepo,
+        ScoringQueueRepository $scoringQueueRepo,
         array $wikis,
         array $getters
     ) {
         $this->db = $db;
         $this->queriesRepo = $queriesRepo;
         $this->resultsRepo = $resultsRepo;
+        $this->scoringQueueRepo = $scoringQueueRepo;
         $this->wikis = $wikis;
         $this->getters = $getters;
         $this->output = function () {};
@@ -62,6 +67,7 @@ class Importer
         $this->db->transactional(function () use ($user, $wiki, $query, $results) {
             $queryId = $this->queriesRepo->createQuery($user, $wiki, $query, 'imported');
             $this->resultsRepo->storeResults($user, $queryId, $results);
+            $this->scoringQueueRepo->insert($queryId);
         });
 
         return count($results);
@@ -77,6 +83,7 @@ class Importer
             $this->db->transactional(function () use ($query, $results) {
                 $this->resultsRepo->storeResults($query['user_id'], $query['id'], $results);
                 $this->queriesRepo->markQueryImported($query['id']);
+                $this->scoringQueueRepo->insert($query['id']);
             });
             $imported += count($results);
         }

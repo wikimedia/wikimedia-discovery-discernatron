@@ -9,6 +9,7 @@ use WikiMedia\RelevanceScoring\Console\CacheClear;
 use WikiMedia\RelevanceScoring\Console\Import;
 use WikiMedia\RelevanceScoring\Console\ImportPending;
 use WikiMedia\RelevanceScoring\Console\PurgeQuery;
+use WikiMedia\RelevanceScoring\Console\UpdateScoringQueue;
 use WikiMedia\RelevanceScoring\Controller\ImportController;
 use WikiMedia\RelevanceScoring\Controller\QueriesController;
 use WikiMedia\RelevanceScoring\Controller\ScoresController;
@@ -40,10 +41,8 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
 
         $controllers->get('/instructions',      'search.controller.queries:instructions')
             ->bind('instructions');
-        $controllers->get('/query',             'search.controller.queries:randomQuery')
-            ->bind('random_query');
-        $controllers->get('/query/wiki/{wiki}', 'search.controller.queries:randomQuery')
-            ->bind('random_query_by_wiki');
+        $controllers->get('/query',             'search.controller.queries:nextQuery')
+            ->bind('next_query');
         $controllers->match('/query/id/{id}',   'search.controller.queries:queryById')
             ->bind('query_by_id');
         $controllers->post('/query/skip/{id}',   'search.controller.queries:skipQueryById')
@@ -83,6 +82,13 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
         $app['search.repository.scores'] = function () use ($app) {
             return new Repository\ScoresRepository($app['db']);
         };
+        $app['search.repository.scoring_queue'] = function () use ($app) {
+            return new Repository\ScoringQueueRepository(
+                $app['db'],
+                new Util\Calendar(),
+                $app['search.scores_per_query']
+            );
+        };
         $app['search.repository.users'] = function () use ($app) {
             return new Repository\UsersRepository($app['db']);
         };
@@ -105,7 +111,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                         // standard caption
                         '.b_caption p',
                         // tabbed article summary
-                        '#tab_1 span'
+                        '#tab_1 span',
                     ],
                 ],
                 '<strong>',
@@ -169,6 +175,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                 $app['db'],
                 $app['search.repository.queries'],
                 $app['search.repository.results'],
+                $app['search.repository.scoring_queue'],
                 $app['search.wikis'],
                 [
                     'bing' => $app['search.importer.bing'],
@@ -208,12 +215,20 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                 $app['search.repository.scores']
             );
         };
+        $app['search.console.updateScoringQueue'] = function () use ($app) {
+            return new UpdateScoringQueue(
+                $app['search.repository.queries'],
+                $app['search.repository.scoring_queue'],
+                $app['search.repository.scores']
+            );
+        };
 
         $app['search.console'] = [
             'search.console.cache-clear',
             'search.console.import',
             'search.console.importPending',
             'search.console.purgeQuery',
+            'search.console.updateScoringQueue',
         ];
     }
 
@@ -228,6 +243,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                 $app['search.repository.queries'],
                 $app['search.repository.results'],
                 $app['search.repository.scores'],
+                $app['search.repository.scoring_queue'],
                 $app['search.wikis']
             );
         };

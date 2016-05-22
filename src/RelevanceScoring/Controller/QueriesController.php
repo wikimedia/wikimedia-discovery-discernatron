@@ -11,6 +11,7 @@ use WikiMedia\RelevanceScoring\Assert\MinimumSubmitted;
 use WikiMedia\RelevanceScoring\Repository\QueriesRepository;
 use WikiMedia\RelevanceScoring\Repository\ResultsRepository;
 use WikiMedia\RelevanceScoring\Repository\ScoresRepository;
+use WikiMedia\RelevanceScoring\Repository\ScoringQueueRepository;
 
 class QueriesController
 {
@@ -39,6 +40,7 @@ class QueriesController
         QueriesRepository $queriesRepo,
         ResultsRepository $resultsRepo,
         ScoresRepository $scoresRepo,
+        ScoringQueueRepository $scoringQueueRepo,
         array $wikis
     ) {
         $this->app = $app;
@@ -48,6 +50,7 @@ class QueriesController
         $this->queriesRepo = $queriesRepo;
         $this->resultsRepo = $resultsRepo;
         $this->scoresRepo = $scoresRepo;
+        $this->scoringQueueRepo = $scoringQueueRepo;
         $this->wikis = $wikis;
     }
 
@@ -56,9 +59,9 @@ class QueriesController
         return $this->twig->render('instructions.twig');
     }
 
-    public function randomQuery(Request $request, $wiki = null)
+    public function nextQuery(Request $request)
     {
-        $maybeId = $this->queriesRepo->getRandomUngradedQuery($this->user, $wiki);
+        $maybeId = $this->scoringQueueRepo->pop($this->user);
         $params = [];
         if ($request->query->get('saved')) {
             $params['saved'] = 1;
@@ -88,9 +91,10 @@ class QueriesController
         // tell users about this.
         if ($form->isValid()) {
             $this->queriesRepo->markQuerySkipped($this->user, $id);
+            $this->scoringQueueRepo->unassignUser($this->user);
         }
 
-        return $this->app->redirect($this->app->path('random_query'));
+        return $this->app->redirect($this->app->path('next_query'));
     }
 
     public function queryById(Request $request, $id)
@@ -119,8 +123,9 @@ class QueriesController
 
         if ($form->isValid()) {
             $this->scoresRepo->storeQueryScores($this->user, $id, $form->getData());
+            $this->scoringQueueRepo->markScored($this->user, $id);
 
-            return $this->app->redirect($this->app->path('random_query', ['saved' => 1]));
+            return $this->app->redirect($this->app->path('next_query', ['saved' => 1]));
         }
 
         return $this->twig->render('score_query.twig', [

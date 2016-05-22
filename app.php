@@ -70,6 +70,7 @@ $app->register($relevanceScoringProvider, [
     'search.wikis' => [
         'enwiki' => 'https://en.wikipedia.org/w/api.php',
     ],
+    'search.scores_per_query' => 5,
 ]);
 $app->mount('/', $relevanceScoringProvider);
 
@@ -141,11 +142,15 @@ $app->before(function (Request $request) use ($app) {
 });
 
 $app->get('/', function () use ($app) {
-    return $app->redirect($app->path('random_query'));
+    return $app->redirect($app->path('next_query'));
 })
 ->bind('root');
 
 $app->get('/login', function () use ($app) {
+    if ($app['session']->has('user')) {
+        return $app->redirect($app->path('next_query'));
+    }
+
     return $app['twig']->render('splash.twig', [
         'domain' => parse_url($app['oauth.base_url'], PHP_URL_HOST),
     ]);

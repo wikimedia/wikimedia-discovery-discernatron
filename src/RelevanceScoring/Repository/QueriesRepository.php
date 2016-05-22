@@ -120,6 +120,57 @@ class QueriesRepository
     }
 
     /**
+     * @param string $wiki
+     *
+     * @return int[]
+     */
+    public function findQueryIdsForWiki($wiki)
+    {
+        return $this->db->project(
+            'SELECT id FROM queries WHERE wiki = ?',
+            [$wiki],
+            function ($row) { return $row['id']; }
+        );
+    }
+
+    /**
+     * @param string $wiki
+     *
+     * @return int[]
+     */
+    public function findImportedQueryIdsForWiki($wiki)
+    {
+        return $this->db->project(
+            'SELECT id FROM queries WHERE wiki = ? AND imported = 1',
+            [$wiki],
+            function ($row) { return $row['id']; }
+        );
+    }
+    /**
+     * @return int[]
+     */
+    public function findAllQueryIds()
+    {
+        return $this->db->project(
+            'SELECT id FROM queries',
+            [],
+            function ($row) { return $row['id']; }
+        );
+    }
+
+    /**
+     * @return int[]
+     */
+    public function findAllImportedQueryIds()
+    {
+        return $this->db->project(
+            'SELECT id FROM queries WHERE imported = 1',
+            [],
+            function ($row) { return $row['id']; }
+        );
+    }
+
+    /**
      * @param int $id
      *
      * @return Option<array>
