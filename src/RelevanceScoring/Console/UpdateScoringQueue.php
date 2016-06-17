@@ -68,14 +68,21 @@ class UpdateScoringQueue extends Command
         $pending = $this->scoringQueueRepo->getNumberPending($queryIds);
         foreach ($queryIds as $queryId) {
             $needed = $num;
+            $have = 0;
             if (isset($scores[$queryId])) {
-                $needed -= $scores[$queryId];
+                $have += $scores[$queryId];
             }
             if (isset($pending[$queryId])) {
-                $needed -= $pending[$queryId];
+                $have += $pending[$queryId];
             }
-            if ($needed > 0) {
-                $count += $this->scoringQueueRepo->insert($queryId, $needed);
+            if ($needed > $have) {
+                $count += $this->scoringQueueRepo->insert(
+                    $queryId,
+                    $needed - $have,
+                    // shifts the priority so ungraded queries still have
+                    // higher priority
+                    $have
+                );
             }
         }
 

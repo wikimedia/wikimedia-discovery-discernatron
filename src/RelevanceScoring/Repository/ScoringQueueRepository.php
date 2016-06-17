@@ -10,7 +10,6 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
 use WikiMedia\OAuth\User;
 use WikiMedia\RelevanceScoring\Util\Calendar;
-use WikiMedia\RelevanceScoring\Exception\RuntimeException;
 
 /**
  * Maintains a queue of queries that need to be scored. Is somewhat
@@ -71,9 +70,6 @@ EOD;
             [$queryIds],
             [Connection::PARAM_INT_ARRAY]
         );
-        if (!$res) {
-            throw new RuntimeException('Failed querying database');
-        }
         $byQueryId = [];
         foreach ($res as $row) {
             $byQueryId[$row['query_id']] = $row['count'];
@@ -87,8 +83,11 @@ EOD;
      *
      * @param int $queryId
      * @param int $numSlots
+     * @param int $priorityOffset By default priority will go from 1 to $numSlots.
+     *                            The value here will be used to shift priority by the specified amount. Note
+     *                            that priority is unsigned, so this must be a positive value.
      */
-    public function insert($queryId, $numSlots = null)
+    public function insert($queryId, $numSlots = null, $priorityOffset = 0)
     {
         if ($numSlots === null) {
             $numSlots = $this->defaultNumSlots;
@@ -100,7 +99,7 @@ EOD;
         // that 0 is the highest priority.
         for (;$numSlots > 0; --$numSlots) {
             $rows[] = "(:queryId, :priority$numSlots)";
-            $params["priority$numSlots"] = $numSlots;
+            $params["priority$numSlots"] = $numSlots + $priorityOffset;
         }
 
         $sql = 'INSERT INTO scoring_queue (query_id, priority) VALUES '.
