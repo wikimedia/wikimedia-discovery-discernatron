@@ -24,6 +24,12 @@
 .snippet em {
 	font-weight: bold;
 }
+.result h5 {
+    margin: 0
+}
+.result .glyphicon {
+    margin: 10px
+}
 @media (max-width: 768px) {
     .border-xs {
         border: 1px solid black;
