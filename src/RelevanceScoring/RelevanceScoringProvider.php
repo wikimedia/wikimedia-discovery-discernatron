@@ -9,6 +9,7 @@ use WikiMedia\RelevanceScoring\Console\CacheClear;
 use WikiMedia\RelevanceScoring\Console\Import;
 use WikiMedia\RelevanceScoring\Console\ImportPending;
 use WikiMedia\RelevanceScoring\Console\PurgeQuery;
+use WikiMedia\RelevanceScoring\Console\ScoringQueueUnassignOld;
 use WikiMedia\RelevanceScoring\Console\UpdateScoringQueue;
 use WikiMedia\RelevanceScoring\Controller\ImportController;
 use WikiMedia\RelevanceScoring\Controller\QueriesController;
@@ -222,6 +223,11 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                 $app['search.repository.scores']
             );
         };
+        $app['search.console.scoringQueueUnassignOld'] = function () use ($app) {
+            return new ScoringQueueUnassignOld(
+                $app['search.repository.scoring_queue']
+            );
+        };
 
         $app['search.console'] = [
             'search.console.cache-clear',
@@ -229,6 +235,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
             'search.console.importPending',
             'search.console.purgeQuery',
             'search.console.updateScoringQueue',
+            'search.console.scoringQueueUnassignOld',
         ];
     }
 

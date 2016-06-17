@@ -25,7 +25,7 @@ class UpdateScoringQueue extends Command
         ScoringQueueRepository $scoringQueueRepo,
         ScoresRepository $scoresRepo
     ) {
-        parent::__construct('update-scoring-queue');
+        parent::__construct('scoring-queue:update');
         $this->queriesRepo = $queriesRepo;
         $this->scoringQueueRepo = $scoringQueueRepo;
         $this->scoresRepo = $scoresRepo;
