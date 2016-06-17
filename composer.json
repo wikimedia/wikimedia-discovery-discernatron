@@ -1,6 +1,7 @@
 {
     "name": "ebernhardson/search-result-ranker",
     "require": {
+        "monolog/monolog": "^1.19.0",
         "silex/silex": "^1.3",
         "doctrine/orm": "^2.5",
         "symfony/form": "~2.3",
