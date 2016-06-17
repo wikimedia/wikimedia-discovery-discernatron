@@ -10,7 +10,7 @@ class HtmlResultGetterTest extends \PHPUnit_Framework_TestCase
             'is_valid' => 'body',
             'results' => 'li',
             'url' => 'a',
-            'snippet' => 'p',
+            'snippet' => ['p'],
         ];
 
         $genHtml = function (array $results) {
@@ -112,4 +112,23 @@ class HtmlResultGetterTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertEquals($expected, $getter->handleResponse($response, 'testwiki', ''));
     }
+
+	/**
+	 * Bing can return content a few different ways. In this test bing has
+	 * provided a tabbed response for the first result containing different
+	 * section from the article.
+	 */
+	public function testBing()
+	{
+		$response = new \GuzzleHttp\Psr7\Response(
+			200,
+			['Content-Type' => 'text/html; charset=UTF-8'],
+			file_get_contents( __DIR__ . '/../../../fixtures/bing_001.html' )
+		);
+			
+		$app = include __DIR__ . '/../../../../app.php';
+		$bing = $app['search.importer.bing'];
+	
+		$bing->handleResponse($response, 'enwiki', '');	
+	}
 }

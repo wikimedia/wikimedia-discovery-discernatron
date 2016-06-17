@@ -101,7 +101,12 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                     'is_valid' => '#b_results',
                     'results' => '#b_results > .b_algo',
                     'url' => 'h2 a',
-                    'snippet' => '.b_caption p',
+                    'snippet' => [
+                        // standard caption
+                        '.b_caption p',
+                        // tabbed article summary
+                        '#tab_1 span'
+                    ],
                 ],
                 '<strong>',
                 '</strong>',
@@ -120,7 +125,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                     'is_valid' => '#ires',
                     'results' => '#rso > .g:not(.g-blk), .srg > .g',
                     'url' => 'h3 a',
-                    'snippet' => '.st',
+                    'snippet' => ['.st'],
                 ],
                 '<em>',
                 '</em>',
@@ -146,7 +151,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                     'is_valid' => '#links',
                     'results' => '#links .web-result',
                     'url' => 'a',
-                    'snippet' => '.snippet, .result__snippet',
+                    'snippet' => ['.snippet, .result__snippet'],
                 ],
                 '<b>',
                 '</b>'

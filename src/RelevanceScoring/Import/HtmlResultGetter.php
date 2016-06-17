@@ -96,17 +96,27 @@ class HtmlResultGetter implements ResultGetterInterface
         }
 
         $results = [];
-        $crawler->filter($this->selectors['results'])->each(function ($result) use (&$results, $wiki, $contentType) {
-            $url = $result->filter($this->selectors['url'])->attr('href');
-            if ($this->isValidWikiArticle($wiki, $url)) {
-                $results[] = ImportedResult::createFromURL(
-                    $this->source,
-                    $url,
-                    $this->extractSnippet($result, $contentType),
-                    count($results)
-                );
-            }
-        });
+        try {
+            $crawler->filter($this->selectors['results'])->each(function ($result) use (&$results, $wiki, $contentType) {
+                $url = $result->filter($this->selectors['url'])->attr('href');
+                if ($this->isValidWikiArticle($wiki, $url)) {
+                    $results[] = ImportedResult::createFromURL(
+                        $this->source,
+                        $url,
+                        $this->extractSnippet($result, $contentType),
+                        count($results)
+                    );
+                }
+            });
+        } catch (\Exception $e) {
+            $file = '/tmp/HtmlResultGetter.debug.html';
+            file_put_contents($file, $html);
+            throw new \RuntimeException(
+                "Error importing '{$query}' from {$this->source}. Html written to $file.",
+                0,
+                $e
+            );
+        }
 
         return $results;
     }
@@ -162,7 +172,16 @@ class HtmlResultGetter implements ResultGetterInterface
     private function extractSnippet(Crawler $result, $contentType)
     {
         // Pull html from the result
-        $html = $result->filter($this->selectors['snippet'])->html();
+        foreach ($this->selectors['snippet'] as $selector) {
+            $snippet = $result->filter($selector);
+            if ($snippet->count() > 0) {
+                break;
+            }
+        }
+        if ($snippet->count() === 0) {
+            throw new RuntimeException("Couldn't locate snippet");
+        }
+        $html = $snippet->html();
         // Replace start and end of bolded portions with custom markers
         $replaced = strtr($html, [
             $this->highlightStart => ImportedResult::START_HIGHLIGHT_MARKER,
