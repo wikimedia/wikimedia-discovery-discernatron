@@ -10,6 +10,7 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
 use WikiMedia\OAuth\User;
 use WikiMedia\RelevanceScoring\Util\Calendar;
+use WikiMedia\RelevanceScoring\Exception\RuntimeException;
 
 /**
  * Maintains a queue of queries that need to be scored. Is somewhat
