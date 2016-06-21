@@ -10,7 +10,7 @@ class ResultsRepositoryTest extends BaseRepositoryTest
     public function testStoreResults()
     {
         $user = $this->genTestUser();
-        $repo = new ResultsRepository($this->db);
+        $repo = new ResultsRepository($this->db, 15);
         $queryId = null;
         $this->db->transactional(function () use ($repo, $user, &$queryId) {
             $queryId = $this->genQuery($user, 'JFK');
@@ -36,7 +36,7 @@ class ResultsRepositoryTest extends BaseRepositoryTest
         $snippet = 'Katsuhisa Hōki is a Japanese voice actor and actor from Nagasaki Prefecture. He is affiliated .... (2004) (Great Devil King); Pocket Monsters Advanced Generation the Movie: The Pokémon Ranger and Prince of the ... The Specialist (Joe Leon); Stargate SG-1 (George Hammond); Starsky and Hutch (Captain Harold Dobey) ...';
 
         $user = $this->genTestUser();
-        $repo = new ResultsRepository($this->db);
+        $repo = new ResultsRepository($this->db, 15);
         $queryId = null;
         $this->db->transactional(function () use ($repo, $user, $title, $snippet, &$queryId) {
             $queryId = $this->genQuery($user, 'starksy and hutch devil');

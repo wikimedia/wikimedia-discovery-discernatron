@@ -75,7 +75,10 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
             return new Repository\QueriesRepository($app['db']);
         };
         $app['search.repository.results'] = function () use ($app) {
-            $repo = new Repository\ResultsRepository($app['db']);
+            $repo = new Repository\ResultsRepository(
+                $app['db'],
+                $app['search.importer_limit']
+            );
             $repo->setLogger($app['search.logger']);
 
             return $repo;
@@ -97,7 +100,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
 
     private function registerImporter(Application $app)
     {
-        $app['search.importer_limit'] = 25;
+        $app['search.importer_limit'] = 15;
         $app['search.importer.bing'] = function () use ($app) {
             return new HtmlResultGetter(
                 $app['guzzle'],

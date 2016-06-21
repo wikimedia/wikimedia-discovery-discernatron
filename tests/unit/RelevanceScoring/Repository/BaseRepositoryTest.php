@@ -69,7 +69,7 @@ abstract class BaseRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     protected function genResult(User $user, $queryId, array $results)
     {
-        $repo = new ResultsRepository($this->db);
+        $repo = new ResultsRepository($this->db, 15);
 
         return $repo->storeResults($user, $queryId, $results);
     }

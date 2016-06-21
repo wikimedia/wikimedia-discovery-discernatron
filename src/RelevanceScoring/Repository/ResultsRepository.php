@@ -19,9 +19,17 @@ class ResultsRepository
     /** @var Connection */
     private $db;
 
-    public function __construct(Connection $db)
+    /** @var int The maximum position returned for scoring */
+    private $maxPosition;
+
+    /**
+     * @param Connection $db
+     * @param int        $maxPosition The maximum position returned for scoring
+     */
+    public function __construct(Connection $db, $maxPosition)
     {
         $this->db = $db;
+        $this->maxPosition = $maxPosition;
         $this->logger = new NullLogger();
     }
 
@@ -115,19 +123,24 @@ SELECT r.id, r.title, r_s.snippet
   FROM results r
   JOIN (SELECT results_id, MAX(snippet_score) as snippet_score
           FROM results_sources
-         WHERE query_id = ?
+         WHERE query_id = :queryId
+           AND position <= :maxPosition
          GROUP BY results_id
        ) r_s_max
     ON r.id = r_s_max.results_id
   JOIN results_sources r_s
     ON r_s.results_id = r_s_max.results_id
    AND r_s.snippet_score = r_s_max.snippet_score
-   AND r_s.query_id = ?
- WHERE r.query_id = ?
+   AND r_s.query_id = :queryId
+   AND r_s.position <= :maxPosition
+ WHERE r.query_id = :queryId
  GROUP BY r.id
  ORDER BY r.id DESC
 EOD;
-        $results = $this->db->fetchAll($sql, [$queryId, $queryId, $queryId]);
+        $results = $this->db->fetchAll($sql, [
+            'queryId' => $queryId,
+            'maxPosition' => $this->maxPosition,
+        ]);
         if ($results === false) {
             return new None();
         }
