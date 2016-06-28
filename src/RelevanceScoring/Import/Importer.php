@@ -3,7 +3,9 @@
 namespace WikiMedia\RelevanceScoring\Import;
 
 use Doctrine\DBAL\Connection;
+use Guzzle\Http\Exception\RequestException;
 use WikiMedia\OAuth\User;
+use WikiMedia\RelevanceScoring\Exception\ImportException;
 use WikiMedia\RelevanceScoring\Exception\RuntimeException;
 use WikiMedia\RelevanceScoring\Repository\QueriesRepository;
 use WikiMedia\RelevanceScoring\Repository\ResultsRepository;
@@ -104,7 +106,15 @@ class Importer
             $this->output("Making request from $key");
             $promises[$key] = $getter->fetchAsync($wiki, $query);
         }
-        $responses = \GuzzleHttp\Promise\unwrap($promises);
+        try {
+            $responses = \GuzzleHttp\Promise\unwrap($promises);
+        } catch (RequestException $e) {
+            throw new ImportException(
+                "Failed request from url: " . $e->getRequest->getUrl(),
+                0
+                $e
+            );
+        }
 
         $results = [];
         foreach ($responses as $key => $response) {
