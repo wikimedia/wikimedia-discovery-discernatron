@@ -116,6 +116,8 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                         '.b_caption p',
                         // tabbed article summary
                         '#tab_1 span',
+                        // sometimes there is no tab 1
+                        '#tab_2 span',
                     ],
                 ],
                 '<strong>',
