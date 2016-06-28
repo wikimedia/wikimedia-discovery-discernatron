@@ -111,7 +111,7 @@ class Importer
         } catch (RequestException $e) {
             throw new ImportException(
                 "Failed request from url: " . $e->getRequest->getUrl(),
-                0
+                0,
                 $e
             );
         }
