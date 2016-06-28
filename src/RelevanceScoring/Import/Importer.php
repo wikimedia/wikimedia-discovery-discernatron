@@ -54,22 +54,34 @@ class Importer
         $callable($line);
     }
 
-    public function import(User $user, $wiki, $query)
+    public function import(User $user, $wiki, $queryString)
     {
         if (!isset($this->wikis[$wiki])) {
             throw new RuntimeException("Unknown wiki: $wiki");
         }
 
-        $maybeQueryId = $this->queriesRepo->findQueryId($wiki, $query);
+        $maybeQueryId = $this->queriesRepo->findQueryId($wiki, $queryString);
+        $queryId = null;
         if ($maybeQueryId->nonEmpty()) {
-            throw new RuntimeException('Query already imported');
+            $queryId = $maybeQueryId->get();
+            $maybeQuery = $this->queriesRepo->getQuery($queryId);
+            if ($maybeQuery->isEmpty()) {
+                throw new RuntimeException('Found query id but not query?!?!?');
+            }
+            $query = $maybeQuery->get();
+            if ($query['imported']) {
+                throw new RuntimeException('Query already imported');
+            }
         }
-        $results = $this->performSearch($wiki, $query);
+        $results = $this->performSearch($wiki, $queryString);
 
-        $this->db->transactional(function () use ($user, $wiki, $query, $results) {
-            $queryId = $this->queriesRepo->createQuery($user, $wiki, $query, 'imported');
+        $this->db->transactional(function () use ($queryId, $user, $wiki, $queryString, $results) {
+            if ($queryId === null) {
+                $queryId = $this->queriesRepo->createQuery($user, $wiki, $queryString, 'imported');
+            }
             $this->resultsRepo->storeResults($user, $queryId, $results);
             $this->scoringQueueRepo->insert($queryId);
+            $this->queriesRepo->markQueryImported($queryId);
         });
 
         return count($results);
