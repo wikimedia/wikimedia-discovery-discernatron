@@ -113,7 +113,7 @@ class ScoresController
             },
             'json' => function ($scores) {
                 return new Response(
-                    json_encode($params['scores']),
+                    json_encode($scores),
                     Response::HTTP_OK,
                     ['Content-Type' => 'application/json']
                 );

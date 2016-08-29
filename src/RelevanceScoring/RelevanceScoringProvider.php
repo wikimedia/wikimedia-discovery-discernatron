@@ -37,6 +37,8 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
 
         $controllers->get('/scores', 'search.controller.scores:scoredQueries')
             ->bind('scores');
+        $controllers->get('/scores/all', 'search.controller.scores:scores')
+            ->bind('all_scores');
         $controllers->get('/scores/{id}', 'search.controller.scores:scoresByQueryId')
             ->bind('query_scores');
 
