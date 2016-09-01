@@ -40,7 +40,11 @@ cat > /etc/apache2/sites-available/000-default.conf <<EOD
 </VirtualHost>
 EOD
 a2enmod rewrite
-service apache2 reload
+# Make sure apache can write to the cache directory
+# For a prod deployment it is better to pre-build the twig's
+# and not have anything writable, but this makes things easy
+sed -i s/www-data/vagrant/ /etc/apache2/envvars
+service apache2 restart
 
 # The JWT lib really doesn't like the clock being off, even by 15s or so,
 # So lets make sure it's reasonable
@@ -59,7 +63,4 @@ fi
 cd /vagrant
 /usr/local/bin/composer install
 
-# Make sure apache can write to the cache directory
-# For a prod deployment it is better to pre-build the twig's
-# and not have anything writable by www-data
-sudo chown -R www-data /vagrant/cache/
+
