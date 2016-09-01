@@ -1,0 +1,54 @@
+{% extends "layout.twig" %}
+
+{% block js %}
+    {{ parent() }}
+    <script>
+        window.scoringData = {
+            'saved': JSON.parse('{{saved|json_encode|e('js')}}'),
+            'query': JSON.parse('{{query|json_encode|e('js')}}'),
+            'results': JSON.parse('{{results|json_encode|e('js')}}'),
+            'baseWikiUrl': JSON.parse('{{baseWikiUrl|json_encode|e('js')}}'),
+        };
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div>
+        {{ form(skipForm, {'attr': {'class': 'skip-query'}}) }}
+    </div>
+
+    <noscript>
+        <div class="errors">
+            <p class="bg-danger">Discernatron requires javascript for the card interface</p>
+        </div>
+    </noscript>
+
+    <div class="row">
+        <h3>Scoring Guidelines</h3>
+        <dl class="dl-horizontal">
+            <dt class="irrelevant">Irrelevant</dt>
+            <dd>Results that have no relationship to the query</dd>
+            <dt class="maybe">Maybe Relevant</dt>
+            <dd>Undesirable results that have some relationship to the query</dd>
+            <dt class="probably">Probably Relevant</dt>
+            <dd>Related and possibly the answer to query, but not certainly. Results found towards the bottom of the result page.</dd>
+            <dt class="relevant">Relevant<dt>
+            <dd>A result you expect to find in the top 5 for the provided query</dd>
+        </dl>
+    </div>
+
+    <form class="score-query" method="post" novalidate>
+        {{ form_errors(form) }}
+        {{ form_widget(form._token) }}
+
+        {% for child in form %}
+            {% if child.vars.name != '_token' %}
+                <input type="hidden" id="result_{{child.vars.name}}" name="{{child.vars.full_name}}" value="0">
+            {% endif %}
+        {% endfor %}
+        <div class="row">
+            <input type="submit" class="btn btn-default" />
+        </div>
+    </form>
+{% endblock %}
+

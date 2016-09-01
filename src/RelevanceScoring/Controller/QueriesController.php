@@ -117,6 +117,12 @@ class QueriesController
             // but the same user gets same order each time.
             $this->user->uid
         );
+        // When encoded to json we will lose the ordering, so
+        // add a key to identify the order
+        $position = 0;
+        foreach ( array_keys( $results ) as $id ) {
+            $results[$id]['order'] = $position++;
+        }
 
         $form = $this->createScoringForm($results);
         $form->handleRequest($request);
@@ -128,7 +134,11 @@ class QueriesController
             return $this->app->redirect($this->app->path('next_query', ['saved' => 1]));
         }
 
-        return $this->twig->render('score_query.twig', [
+        $template = $request->query->get('cards', false)
+            ? 'score_query_cards.twig'
+            : 'score_query.twig';
+
+        return $this->twig->render($template, [
             'query' => $query,
             'results' => $results,
             'form' => $form->createView(),
