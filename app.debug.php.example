@@ -1,0 +1,18 @@
+<?php
+
+if (defined('PHPUNIT_COMPOSER_INSTALL')) {
+    return;
+}
+
+$user = new \WikiMedia\OAuth\User();
+$user->uid = 1;
+$user->name = 'Admin';
+$user->nickname = 'Admin';
+$user->extra['issued'] = time();
+$user->extra['editCount'] = 0;
+
+$app['session']->set('user', $user);
+$app['session']->set('oauth.credentials', 'foo');
+$app['search.repository.users']->updateUser($user);
+
+unset($user);
