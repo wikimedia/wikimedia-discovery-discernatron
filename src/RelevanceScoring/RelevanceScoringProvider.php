@@ -10,7 +10,6 @@ use WikiMedia\RelevanceScoring\Console\Import;
 use WikiMedia\RelevanceScoring\Console\ImportPending;
 use WikiMedia\RelevanceScoring\Console\PurgeQuery;
 use WikiMedia\RelevanceScoring\Console\ScoringQueueUnassignOld;
-use WikiMedia\RelevanceScoring\Console\UpdateScoringQueue;
 use WikiMedia\RelevanceScoring\Controller\ImportController;
 use WikiMedia\RelevanceScoring\Controller\QueriesController;
 use WikiMedia\RelevanceScoring\Controller\ScoresController;
@@ -92,7 +91,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
             return new Repository\ScoringQueueRepository(
                 $app['db'],
                 new Util\Calendar(),
-                $app['search.scores_per_query']
+                $app['search.default_scoring_slots']
             );
         };
         $app['search.repository.users'] = function () use ($app) {
@@ -223,13 +222,6 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                 $app['search.repository.scores']
             );
         };
-        $app['search.console.updateScoringQueue'] = function () use ($app) {
-            return new UpdateScoringQueue(
-                $app['search.repository.queries'],
-                $app['search.repository.scoring_queue'],
-                $app['search.repository.scores']
-            );
-        };
         $app['search.console.scoringQueueUnassignOld'] = function () use ($app) {
             return new ScoringQueueUnassignOld(
                 $app['search.repository.scoring_queue']
@@ -241,7 +233,6 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
             'search.console.import',
             'search.console.importPending',
             'search.console.purgeQuery',
-            'search.console.updateScoringQueue',
             'search.console.scoringQueueUnassignOld',
         ];
     }

@@ -27,29 +27,20 @@ class ScoringQueueRepository
     private $db;
     /** @var Calendar */
     private $cal;
-    /** @var int */
-    private $defaultNumSlots;
+    /** @var int[] */
+    private $defaultSlots;
 
     /**
      * @var Connection
      * @var Calendar   $cal
-     * @var int        $numSlots The default number of scoring slots to create
-     *                 for a query
+     * @var int[]      $slots The default scoring slots to create
      */
-    public function __construct(Connection $db, Calendar $cal, $numSlots)
+    public function __construct(Connection $db, Calendar $cal, array $slots)
     {
         $this->db = $db;
         $this->cal = $cal;
-        $this->defaultNumSlots = $numSlots;
+        $this->defaultSlots = $slots;
         $this->logger = new NullLogger();
-    }
-
-    /**
-     * @return int
-     */
-    public function getDefaultNumSlots()
-    {
-        return $this->defaultNumSlots;
     }
 
     /**
@@ -82,24 +73,17 @@ EOD;
      * Mark a queryId as needing to be scored $numSlots times.
      *
      * @param int $queryId
-     * @param int $numSlots
-     * @param int $priorityOffset By default priority will go from 1 to $numSlots.
-     *                            The value here will be used to shift priority by the specified amount. Note
-     *                            that priority is unsigned, so this must be a positive value.
      */
-    public function insert($queryId, $numSlots = null, $priorityOffset = 0)
+    public function insert($queryId)
     {
-        if ($numSlots === null) {
-            $numSlots = $this->defaultNumSlots;
-        }
-
         $params = ['queryId' => $queryId];
         $rows = [];
         // very simple priority assignment from 1 to $numSlots. Note
-        // that 0 is the highest priority.
-        for (;$numSlots > 0; --$numSlots) {
-            $rows[] = "(:queryId, :priority$numSlots)";
-            $params["priority$numSlots"] = $numSlots + $priorityOffset;
+        // that 0 is the highest priority, and we create two items with
+        // priority 1.
+        foreach ( $this->defaultSlots as $priority ) {
+            $rows[] = "(:queryId, :priority$priority)";
+            $params["priority$priority"] = $priority;
         }
 
         $sql = 'INSERT INTO scoring_queue (query_id, priority) VALUES '.

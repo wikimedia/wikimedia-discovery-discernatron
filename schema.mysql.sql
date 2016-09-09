@@ -67,8 +67,8 @@ CREATE TABLE IF NOT EXISTS `scoring_queue` (
     query_id INTEGER UNSIGNED NOT NULL,
     priority INTEGER UNSIGNED NOT NULL,
     last_assigned INTEGER UNSIGNED,
-    FOREIGN KEY `queries_skipped_user_id` (user_id) REFERENCES users(id),
-    FOREIGN KEY `queries_skipped_query_id` (query_id) REFERENCES queries(id),
+    FOREIGN KEY `scoring_queue_user_id` (user_id) REFERENCES users(id),
+    FOREIGN KEY `scoring_queue_query_id` (query_id) REFERENCES queries(id),
     KEY `last_assigned_sort_key` (`last_assigned`, `query_id`),
     KEY `scoring_queue_priority` (`priority`, `query_id`)
 ) CHARSET=utf8mb4;
