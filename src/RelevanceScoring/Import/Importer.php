@@ -136,6 +136,51 @@ class Importer
             $results = array_merge($results, $newResults);
         }
 
+        $this->augmentWithRedirects($wiki, $results);
+
         return $results;
+    }
+
+    /**
+     * Updates the results to mark if it is a redirect, and
+     * where it is a redirect to.
+     *
+     * @param string $wiki
+     * @param ImportedResult[]
+     */
+    private function augmentWithRedirects( $wiki, array $results ) {
+        $titles = [];
+        foreach ( $results as $result ) {
+            $titles[$result->getTitle()] = true;
+        }
+
+        $query = [
+            'action' => 'query',
+            'redirects' => '1',
+            'titles' => implode( '|', array_keys( $titles ) ),
+            'format' => 'json',
+            'formatversion' => 2,
+        ];
+
+        $url = $this->wikis[$wiki] . '?' . http_build_query($query);
+        $response = file_get_contents($url);
+        $decoded = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            var_dump($response);
+            throw new \RuntimeException('Failed fetching/decoding redirects');
+        }
+        $redirects = [];
+        foreach ( $decoded['query']['redirects'] as $redirect ) {
+            $redirects[$redirect['from']] = $redirect['to'];
+        }
+
+        foreach ($results as $result) {
+            // We don't have to worry about normalization issues, the
+            // api returns the exact title we passed (with, for example,
+            // underscores or spaces), in the from field.
+            if (isset($redirects[$result->getTitle()])) {
+                $result->setRedirectsToTitle($redirects[$result->getTitle()]);
+            }
+        }
     }
 }

@@ -176,6 +176,7 @@ EOD;
                     'title' => $title,
                     'title_hash' => md5($title),
                     'created' => $now,
+                    'redirect_to' => $result->getRedirectsToTitle(),
                 ]);
                 if ($affected !== 1) {
                     throw new RuntimeException('Expected 1 inserted row but got: '.$affected);

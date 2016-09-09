@@ -16,6 +16,8 @@ class ImportedResult
     private $snippet;
     /** @var int */
     private $position;
+    /** @var string */
+    private $redirectsToTitle = '';
 
     /**
      * ImportedResult constructor.
@@ -95,5 +97,13 @@ class ImportedResult
         default:
             return 10;
         }
+    }
+
+    public function getRedirectsToTitle() {
+        return $this->redirectsToTitle;
+    }
+
+    public function setRedirectsToTitle($title) {
+        $this->redirectsToTitle = $title;
     }
 }

@@ -18,9 +18,10 @@ CREATE TABLE IF NOT EXISTS `queries` (
 CREATE TABLE IF NOT EXISTS `results` (
     id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     query_id INTEGER UNSIGNED NOT NULL,
-    title VARCHAR(10000) NOT NULL,
+    title TEXT NOT NULL,
     title_hash CHAR(32) NOT NULL,
     created INTEGER UNSIGNED NOT NULL,
+    redirect_to TEXT NOT NULL,
     FOREIGN KEY `results_query_id` (`query_id`) REFERENCES `queries`(`id`),
     UNIQUE KEY `results_unique_query_title` (`query_id`, `title_hash`)
 ) CHARSET=utf8mb4;
