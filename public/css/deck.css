@@ -51,6 +51,7 @@ em {
     padding: 12px 12px 0 12px;
     margin-left: 18px;
     color: white;
+    z-index: 99;
 }
 
 .query {
