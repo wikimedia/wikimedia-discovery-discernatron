@@ -212,17 +212,22 @@ EOD;
     private function popNull(User $user)
     {
         $sql = <<<EOD
-SELECT s_q.id, s_q.query_id
-  FROM scoring_queue s_q
-  LEFT OUTER JOIN queries_skipped q_s
-    ON q_s.user_id = ? AND q_s.query_id = s_q.query_id
- WHERE s_q.user_id IS NULL
-   AND q_s.id IS NULL
- ORDER BY s_q.priority ASC
+SELECT queue.id, queue.query_id
+  FROM scoring_queue queue
+  LEFT OUTER JOIN queries_skipped skipped
+    ON skipped.user_id = :userId AND skipped.query_id = queue.query_id
+  LEFT OUTER JOIN scores scores
+    ON scores.user_id = :userId AND scores.query_id = queue.query_id
+ WHERE queue.user_id IS NULL
+   AND scores.id IS NULL
+   AND skipped.id IS NULL
+ ORDER BY queue.priority ASC
  LIMIT 1
 EOD;
 
-        return $this->db->fetchAll($sql, [$user->uid]);
+        return $this->db->fetchAll($sql, [
+            'userId' => $user->uid,
+        ]);
     }
 
     /**
@@ -236,15 +241,20 @@ EOD;
     private function popLastAssigned(User $user)
     {
         $sql = <<<EOD
-SELECT s_q.id, s_q.query_id
-  FROM scoring_queue s_q
-  LEFT OUTER JOIN queries_skipped q_s
-    ON q_s.user_id = ? AND q_s.query_id = s_q.query_id
- WHERE q_s.id IS NULL
- ORDER BY s_q.last_assigned ASC
+SELECT queue.id, queue.query_id
+  FROM scoring_queue queue
+  LEFT OUTER JOIN queries_skipped skipped
+    ON skipped.user_id = :userId AND skipped.query_id = queue.query_id
+  LEFT OUTER JOIN scores scores
+    ON scores.user_id = :userId AND scores.query_id = queue.query_id
+ WHERE skipped.id IS NULL
+   AND scores.id IS NULL
+ ORDER BY queue.last_assigned ASC
  LIMIT 1
 EOD;
 
-        return $this->db->fetchAll($sql, [$user->uid]);
+        return $this->db->fetchAll($sql, [
+            'userId' => $user->uid,
+        ]);
     }
 }
