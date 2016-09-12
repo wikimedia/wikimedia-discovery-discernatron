@@ -69,7 +69,7 @@ class QueriesController
         if ($maybeId->isEmpty()) {
             return $this->twig->render('all_scored.twig', $params);
         } else {
-            $params['id'] = $maybeId->get();
+            $params['queryId'] = $maybeId->get();
 
             return $this->app->redirect($this->app->path('query_by_id', $params));
         }
@@ -166,7 +166,7 @@ class QueriesController
     private function createSkipForm($queryId)
     {
         $builder = $this->formFactory->createBuilder('form')
-            ->setAction($this->app->path('skip_query_by_id', ['id' => $queryId]))
+            ->setAction($this->app->path('skip_query_by_id', ['queryId' => $queryId]))
             ->add('submit', 'submit', [
                 'label' => 'Skip this query',
                 'attr' => ['class' => 'btn btn-warning'],
