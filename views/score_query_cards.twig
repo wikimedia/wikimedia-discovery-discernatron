@@ -37,7 +37,7 @@
         {{ form_widget(form._token) }}
         {% for child in form %}
             {% if child.vars.name != '_token' %}
-                <input type="hidden" id="result_{{child.vars.name}}" name="{{child.vars.full_name}}" value="">
+                <input class="result-score" type="text" id="result_{{child.vars.name}}" name="{{child.vars.full_name}}" value="{{child.vars.value}}" data-id="{{child.vars.name}}">
             {% endif %}
         {% endfor %}
         <div class="row">

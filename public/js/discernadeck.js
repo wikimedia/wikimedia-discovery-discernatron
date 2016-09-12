@@ -2,13 +2,6 @@ var cards = document.querySelectorAll( '.card' );
 
 var dropAreas = document.querySelectorAll( '.drop-area' );
 
-var escapeHtml = function ( html ) {
-	var text = document.createTextNode(html);
-	var div = document.createElement('div');
-	div.appendChild(text);
-	return div.innerHTML;
-}
-
 /**
  * State machine fun time
  * stack has many cards
@@ -174,7 +167,7 @@ var Deck = {
 	cardsInDeck: [],
 	hammerDeck: Object,
 	currentCard: false,
-	initializeDeck: function() {
+	initializeDeck: function( onDone ) {
 		// maybe do some ajax stuff?
 		var deck = this;
 		window.setTimeout( function(){
@@ -183,11 +176,27 @@ var Deck = {
 			deck.setCardCounter();
 			deck.hammerDeck = new Hammer( deck.domEl );
 			deck.hammerDeck.on( 'tap', deck.revealCard( deck ) );
-
+			onDone && onDone();
 		}, 500 )
 	},
 	setCardCounter: function() {
 		this.counterEl.innerHTML = this.cardsInDeck.length;
+	},
+	createCard: function( deck, position ) {
+		var card = Object.create(Card, {
+			cardData: {writable: true, configurable: true, value: deck.cardsInDeck[position]},
+			deck: {writable: true, configurable: true, value: deck}
+		});
+		card.initialize();
+		return card;
+	},
+	findPosition: function( deck, id ) {
+		for (var i = 0; i < deck.cardsInDeck.length; i++) {
+			if (deck.cardsInDeck[i].id == id) {
+				return i;
+			}
+		}
+		throw "unknown card";
 	},
 	revealCard: function( deck ) {
 
@@ -197,12 +206,7 @@ var Deck = {
 			}
 
 			if ( deck.cardsInDeck.length > 0 ) {
-
-				var card = Object.create(Card, {
-					cardData: {writable: true, configurable: true, value: deck.cardsInDeck[0]},
-					deck: {writable: true, configurable: true, value: deck}
-				});
-				card.initialize();
+				var card = deck.createCard(deck, 0);
 				deck.currentCard = card;
 			}
 		}
@@ -229,7 +233,32 @@ var deck = Object.create( Deck, {
 	counterEl:  {writable: true, configurable: true, value: document.querySelector('.deck-counter') },
 });
 
-deck.initializeDeck();
+deck.initializeDeck( function () {
+	// assign already scored cards
+	var inputs = document.querySelectorAll( 'input.result-score' ),
+		stacksByScore = {};
+	if (inputs.length === 0) {
+		return;
+	}
+	for ( var i = 0; i < globalStackAccessor.length; i++) {
+		var stack = globalStackAccessor[i];
+		stacksByScore[stack.domEl.attributes.getNamedItem('data-score').value] = stack;
+	}
+	for ( var i = 0; i < inputs.length; i++ ) {
+		switch(inputs[i].value) {
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+			var position = deck.findPosition(deck, inputs[i].attributes.getNamedItem('data-id').value),
+				card = deck.createCard(deck, position),
+				score = inputs[i].value;
+			card.moveCardToStack(false, stacksByScore[score]);
+			break;
+		}
+	}
+});
+
 
 
 var stacks = document.querySelectorAll( '.drop-area' );
@@ -243,7 +272,5 @@ for ( var i = 0; i < stacks.length; i++ ) {
 	stacks[i].stack = stack;
 	stacks[i].stack.initialize();
 	globalStackAccessor.push( stack )
-
 }
 
-document.querySelector( '.info .query' ).innerText = window.scoringData.query.query;

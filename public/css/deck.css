@@ -10,6 +10,13 @@ body {
     background-image: radial-gradient(#95c791, #628060);
 }
 
+/* When using a hidden input field chromes Back/Forward
+ * cache doesn't remember changed values. So instead we
+ * use a text input and don't display it to the user
+ */
+input.result-score {
+    display: none;
+}
 
 .stack-position {
     /* slightly flexible
