@@ -12,6 +12,7 @@ use WikiMedia\RelevanceScoring\Repository\QueriesRepository;
 use WikiMedia\RelevanceScoring\Repository\ResultsRepository;
 use WikiMedia\RelevanceScoring\Repository\ScoresRepository;
 use WikiMedia\RelevanceScoring\Repository\ScoringQueueRepository;
+use WikiMedia\RelevanceScoring\Repository\UsersRepository;
 
 class QueriesController
 {
@@ -29,6 +30,8 @@ class QueriesController
     private $resultsRepo;
     /** @var ScoresRepository */
     private $scoresRepo;
+    /** @var UsersRepository */
+    private $userRepo;
     /** @var string[] */
     private $wikis;
 
@@ -41,6 +44,7 @@ class QueriesController
         ResultsRepository $resultsRepo,
         ScoresRepository $scoresRepo,
         ScoringQueueRepository $scoringQueueRepo,
+        UsersRepository $userRepo,
         array $wikis
     ) {
         $this->app = $app;
@@ -51,6 +55,7 @@ class QueriesController
         $this->resultsRepo = $resultsRepo;
         $this->scoresRepo = $scoresRepo;
         $this->scoringQueueRepo = $scoringQueueRepo;
+        $this->userRepo = $userRepo;
         $this->wikis = $wikis;
     }
 
@@ -134,13 +139,12 @@ class QueriesController
             return $this->app->redirect($this->app->path('next_query', ['saved' => 1]));
         }
 
-        $template = $request->query->get('cards', false)
-            ? 'score_query_cards.twig'
-            : 'score_query.twig';
+        $template = $this->chooseScoringTemplate($request);
 
         return $this->twig->render($template, [
             'query' => $query,
             'results' => $results,
+            'resultsList' => array_values( $results ),
             'form' => $form->createView(),
             'saved' => (bool) $request->query->get('saved'),
             'skipForm' => $this->createSkipForm($queryId)->createView(),
@@ -237,5 +241,27 @@ class QueriesController
         }
 
         return $array;
+    }
+
+    private function chooseScoringTemplate(Request $request) {
+        $fromQuery = $request->query->get('cards', null);
+        if ($fromQuery !== null) {
+            // override requested
+            $interface = (bool)$fromQuery 
+                ? 'solitaire'
+                : 'classic';
+            if ($interface !== $this->user->extra['scoringInterface']) {
+                $this->user->extra['scoringInterface'] = $interface;
+                $this->userRepo->updateUser($this->user);
+            }
+        } 
+
+        switch ($this->user->extra['scoringInterface']) {
+        case 'solitaire':
+            return 'score_query_cards.twig';
+        case 'classic':
+        default:
+            return 'score_query.twig';
+        }
     }
 }

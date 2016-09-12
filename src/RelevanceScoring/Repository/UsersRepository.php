@@ -23,6 +23,7 @@ class UsersRepository
         $properties = [
             'name' => $user->name,
             'edit_count' => $user->extra['editCount'],
+            'scoring_interface' => $user->extra['scoringInterface'],
         ];
 
         if ($this->userExists($user)) {
@@ -63,7 +64,7 @@ class UsersRepository
 
     private function createUserFromCondition($condition, $values)
     {
-        $sql = "SELECT id, name, edit_count FROM users WHERE $condition";
+        $sql = "SELECT id, name, edit_count, scoring_interface FROM users WHERE $condition";
         $row = $this->db->fetchAssoc($sql, $values);
         if (!$row) {
             return new None();
@@ -72,7 +73,10 @@ class UsersRepository
         $user = new User();
         $user->uid = (int) $row['id'];
         $user->name = $row['name'];
-        $user->extra = ['editCount' => $row['edit_count']];
+        $user->extra = [
+            'editCount' => $row['edit_count'],
+            'scoringInterface' => $row['scoringInterface'],
+        ];
 
         return new Some($user);
     }

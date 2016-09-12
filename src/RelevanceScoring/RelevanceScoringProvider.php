@@ -249,6 +249,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                 $app['search.repository.results'],
                 $app['search.repository.scores'],
                 $app['search.repository.scoring_queue'],
+                $app['search.repository.users'],
                 $app['search.wikis']
             );
         };

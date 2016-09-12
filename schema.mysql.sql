@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(500) NOT NULL,
     `edit_count` INTEGER NOT NULL,
+    `scoring_interface` CHAR(12) NOT NULL,
     `created` INTEGER NOT NULL
 ) CHARSET=utf8mb4;
 CREATE TABLE IF NOT EXISTS `queries` (
