@@ -37,7 +37,7 @@ var Stack = {
 			card.setCardXY( stackXY.x, stackXY.y + stack.gap - (( reverseIndex - 1) * stack.DROP_GAP ));
 		}
 	},
-	onTap: function tapOnDropArea( stack ) {
+	onTap: function ( stack ) {
 		return function( ev ) {
 			if ( stack.deck.currentCard ) {
 				stack.deck.currentCard.moveCardToStack( false, stack );
@@ -136,14 +136,23 @@ var Card = {
 			if ( droppedArea ) {
 				card.moveCardToStack( card.stack, droppedArea.stack );
 			} else {
+
 				// jump back to deck
 				if ( card.stack ) {
 					card.stack.removeCard();
 					card.stack = false;
 				}
+				if ( deck.currentCard ) {
+					deck.moveCardToBottom();
+				}
+				deck.currentCard = card;
+				deck.cardsInDeck.unshift(card.cardData);
 				card.setCardXY( 0, 0 );
 				TweenLite.to( card.domEl, 0.8,{ x:"0", y:"0", ease:Elastic.easeOut } );
-				this.formEl.value = "";
+				card.formEl.value = "";
+				if (deck.cardsInDeck.length > 1) {
+					deck.domEl.classList.remove( 'empty' );
+				}
 			}
 		}
 	},
@@ -218,6 +227,10 @@ var Deck = {
 				var card = deck.createCard(deck, 0);
 				deck.currentCard = card;
 			}
+			if ( deck.cardsInDeck.length <= 1 ) {
+				deck.domEl.classList.add( 'empty' );
+			}
+
 		}
 	},
 	removeFromDeck: function( card ) {
