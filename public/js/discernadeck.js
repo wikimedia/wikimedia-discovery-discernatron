@@ -153,7 +153,7 @@ var Card = {
             snippet = this.cardData.snippet.split('\uE000').join('<b>').split('\uE001').join('</b>');
 		el.classList.add('card');
         // note this isn't safe from XSS. should use document.createElement
-		el.innerHTML = "<a href='" + link + "'>" + this.cardData.title + "</a><p>" + snippet + "</p>";
+		el.innerHTML = "<a target='_blank' href='" + link + "'>" + this.cardData.title + "</a><p>" + snippet + "</p>";
 		this.domEl = el;
 		document.querySelector( '.stack' ).appendChild( this.domEl );
 	},
