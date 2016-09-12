@@ -1,6 +1,6 @@
-var cards = document.querySelectorAll( '.card' );
-
 var dropAreas = document.querySelectorAll( '.drop-area' );
+
+var stacks = document.querySelectorAll( '.drop-area' );
 
 /**
  * State machine fun time
@@ -110,13 +110,20 @@ var Card = {
 			TweenLite.set( card.domEl, {x: offsetX, y: offsetY} );
 		}
 	},
+	onDoubleTap: function( card ) {
+		return function( ev ) {
+			if ( card.stack && card.stack.cards.indexOf(card) === card.stack.cards.length - 1 ) {
+				card.stack.onTap( card.stack )();
+			}
+		}
+	},
 	moveCardToStack: function( oldStack, newStack ){
 		this.deck.removeFromDeck( this );
 		newStack.addCard(this);
 		this.stack = newStack;
 		var droppedAreaXY = newStack.getStackPos();
 		this.setCardXY( droppedAreaXY.x,  droppedAreaXY.y );
-		TweenLite.to( this.domEl, 0.8,{x: this.x, y: this.y, zIndex:this.stack.getCards().length - 1, ease:Elastic.easeOut} );
+		TweenLite.to( this.domEl, 0.2,{x: this.x, y: this.y, zIndex:this.stack.getCards().length - 1, ease:Power4.easeOut} );
 		this.formEl.value = newStack.domEl.attributes.getNamedItem('data-score').value;
 	},
 	onPanEnd: function( card ) {
@@ -158,6 +165,7 @@ var Card = {
 		hammerCard.on( 'panstart', this.onPanStart( this ) );
 		hammerCard.on( 'pan', this.onPan( this ) );
 		hammerCard.on( 'panend', this.onPanEnd( this ) );
+		hammerCard.on( 'tap', this.onDoubleTap( this ) );
 	}
 };
 
@@ -177,6 +185,7 @@ var Deck = {
 			deck.hammerDeck = new Hammer( deck.domEl );
 			deck.hammerDeck.on( 'tap', deck.revealCard( deck ) );
 			onDone && onDone();
+			deck.revealCard(deck)();
 		}, 500 )
 	},
 	setCardCounter: function() {
@@ -217,6 +226,7 @@ var Deck = {
 			this.cardsInDeck.splice( this.cardsInDeck.indexOf( card.cardData ), 1 );
 			this.currentCard = false;
 			this.setCardCounter();
+			this.revealCard( this )();
 		}
 	},
 	moveCardToBottom: function(){
@@ -240,9 +250,9 @@ deck.initializeDeck( function () {
 	if (inputs.length === 0) {
 		return;
 	}
-	for ( var i = 0; i < globalStackAccessor.length; i++) {
-		var stack = globalStackAccessor[i];
-		stacksByScore[stack.domEl.attributes.getNamedItem('data-score').value] = stack;
+	for ( var i = 0; i < stacks.length; i++) {
+		var stackEl = stacks[i];
+		stacksByScore[stackEl.attributes.getNamedItem('data-score').value] = stackEl.stack;
 	}
 	for ( var i = 0; i < inputs.length; i++ ) {
 		switch(inputs[i].value) {
@@ -260,9 +270,6 @@ deck.initializeDeck( function () {
 });
 
 
-
-var stacks = document.querySelectorAll( '.drop-area' );
-var globalStackAccessor = [];
 for ( var i = 0; i < stacks.length; i++ ) {
 	var stack = Object.create( Stack, {
 		domEl: {writable: true, configurable: true, value: stacks[i] },
@@ -271,6 +278,5 @@ for ( var i = 0; i < stacks.length; i++ ) {
 	});
 	stacks[i].stack = stack;
 	stacks[i].stack.initialize();
-	globalStackAccessor.push( stack )
 }
 
