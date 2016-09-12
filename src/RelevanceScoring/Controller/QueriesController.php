@@ -75,37 +75,37 @@ class QueriesController
         }
     }
 
-    public function skipQueryById(Request $request, $id)
+    public function skipQueryById(Request $request, $queryId)
     {
-        $maybeQuery = $this->queriesRepo->getQuery($id);
+        $maybeQuery = $this->queriesRepo->getQuery($queryId);
         if ($maybeQuery->isEmpty()) {
             // @todo 404
             throw new \Exception('Query not found');
         }
 
-        $form = $this->createSkipForm($id);
+        $form = $this->createSkipForm($queryId);
         $form->handleRequest($request);
 
         // If the form isn't valid just do nothing, not a big deal. Should
         // look into adding session based notifications to make it easier to
         // tell users about this.
         if ($form->isValid()) {
-            $this->queriesRepo->markQuerySkipped($this->user, $id);
+            $this->queriesRepo->markQuerySkipped($this->user, $queryId);
             $this->scoringQueueRepo->unassignUser($this->user);
         }
 
         return $this->app->redirect($this->app->path('next_query'));
     }
 
-    public function queryById(Request $request, $id)
+    public function queryById(Request $request, $queryId)
     {
-        $maybeQuery = $this->queriesRepo->getQuery($id);
+        $maybeQuery = $this->queriesRepo->getQuery($queryId);
         if ($maybeQuery->isEmpty()) {
             // @todo 404
             throw new \Exception('Query not found');
         }
 
-        $maybeResults = $this->resultsRepo->getQueryResults($id);
+        $maybeResults = $this->resultsRepo->getQueryResults($queryId);
         if ($maybeResults->isEmpty()) {
             throw new \Exception('No results found for query');
         }
@@ -128,8 +128,8 @@ class QueriesController
         $form->handleRequest($request);
 
         if ($form->isValid()) {
-            $this->scoresRepo->storeQueryScores($this->user, $id, $form->getData());
-            $this->scoringQueueRepo->markScored($this->user, $id);
+            $this->scoresRepo->storeQueryScores($this->user, $queryId, $form->getData());
+            $this->scoringQueueRepo->markScored($this->user, $queryId);
 
             return $this->app->redirect($this->app->path('next_query', ['saved' => 1]));
         }
@@ -143,7 +143,7 @@ class QueriesController
             'results' => $results,
             'form' => $form->createView(),
             'saved' => (bool) $request->query->get('saved'),
-            'skipForm' => $this->createSkipForm($id)->createView(),
+            'skipForm' => $this->createSkipForm($queryId)->createView(),
             'baseWikiUrl' => $this->getBaseUrl($query['wiki']),
         ]);
     }
