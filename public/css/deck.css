@@ -18,6 +18,10 @@ input.result-score {
     display: none;
 }
 
+.score-query {
+    margin-bottom: 1em;
+}
+
 .stack-position {
     /* slightly flexible
     position: absolute;
