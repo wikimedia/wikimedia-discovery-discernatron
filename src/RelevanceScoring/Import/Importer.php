@@ -122,7 +122,7 @@ class Importer
             $responses = \GuzzleHttp\Promise\unwrap($promises);
         } catch (RequestException $e) {
             throw new ImportException(
-                "Failed request from url: " . $e->getRequest->getUrl(),
+                'Failed request from url: '.$e->getRequest->getUrl(),
                 0,
                 $e
             );
@@ -148,21 +148,22 @@ class Importer
      * @param string $wiki
      * @param ImportedResult[]
      */
-    private function augmentWithRedirects( $wiki, array $results ) {
+    private function augmentWithRedirects($wiki, array $results)
+    {
         $titles = [];
-        foreach ( $results as $result ) {
+        foreach ($results as $result) {
             $titles[$result->getTitle()] = true;
         }
 
         $query = [
             'action' => 'query',
             'redirects' => '1',
-            'titles' => implode( '|', array_keys( $titles ) ),
+            'titles' => implode('|', array_keys($titles)),
             'format' => 'json',
             'formatversion' => 2,
         ];
 
-        $url = $this->wikis[$wiki] . '?' . http_build_query($query);
+        $url = $this->wikis[$wiki].'?'.http_build_query($query);
         $response = file_get_contents($url);
         $decoded = json_decode($response, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
@@ -170,7 +171,7 @@ class Importer
             throw new \RuntimeException('Failed fetching/decoding redirects');
         }
         $redirects = [];
-        foreach ( $decoded['query']['redirects'] as $redirect ) {
+        foreach ($decoded['query']['redirects'] as $redirect) {
             $redirects[$redirect['from']] = $redirect['to'];
         }
 

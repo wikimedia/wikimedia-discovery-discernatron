@@ -99,11 +99,13 @@ class ImportedResult
         }
     }
 
-    public function getRedirectsToTitle() {
+    public function getRedirectsToTitle()
+    {
         return $this->redirectsToTitle;
     }
 
-    public function setRedirectsToTitle($title) {
+    public function setRedirectsToTitle($title)
+    {
         $this->redirectsToTitle = $title;
     }
 }

@@ -99,7 +99,7 @@ EOD;
 
     /**
      * @param User $user
-     * @param int $queryId
+     * @param int  $queryId
      *
      * @return array
      *

@@ -125,7 +125,7 @@ class QueriesController
         // When encoded to json we will lose the ordering, so
         // add a key to identify the order
         $position = 0;
-        foreach ( array_keys( $results ) as $id ) {
+        foreach (array_keys($results) as $id) {
             $results[$id]['order'] = $position++;
         }
 
@@ -144,7 +144,7 @@ class QueriesController
         return $this->twig->render($template, [
             'query' => $query,
             'results' => $results,
-            'resultsList' => array_values( $results ),
+            'resultsList' => array_values($results),
             'form' => $form->createView(),
             'saved' => (bool) $request->query->get('saved'),
             'skipForm' => $this->createSkipForm($queryId)->createView(),
@@ -243,18 +243,19 @@ class QueriesController
         return $array;
     }
 
-    private function chooseScoringTemplate(Request $request) {
+    private function chooseScoringTemplate(Request $request)
+    {
         $fromQuery = $request->query->get('cards', null);
         if ($fromQuery !== null) {
             // override requested
-            $interface = (bool)$fromQuery 
+            $interface = (bool) $fromQuery
                 ? 'solitaire'
                 : 'classic';
             if ($interface !== $this->user->extra['scoringInterface']) {
                 $this->user->extra['scoringInterface'] = $interface;
                 $this->userRepo->updateUser($this->user);
             }
-        } 
+        }
 
         switch ($this->user->extra['scoringInterface']) {
         case 'solitaire':

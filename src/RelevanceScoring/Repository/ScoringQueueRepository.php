@@ -81,7 +81,7 @@ EOD;
         // very simple priority assignment from 1 to $numSlots. Note
         // that 0 is the highest priority, and we create two items with
         // priority 1.
-        foreach ( $this->defaultSlots as $priority ) {
+        foreach ($this->defaultSlots as $priority) {
             $rows[] = "(:queryId, :priority$priority)";
             $params["priority$priority"] = $priority;
         }
