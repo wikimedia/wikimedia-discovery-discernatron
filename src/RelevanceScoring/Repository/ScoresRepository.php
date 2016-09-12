@@ -98,13 +98,14 @@ EOD;
     }
 
     /**
+     * @param User $user
      * @param int $queryId
      *
      * @return array
      *
      * @throws RuntimeException
      */
-    public function getScoresForQuery($queryId)
+    public function getScoresForQuery(User $user, $queryId)
     {
         $sql = <<<EOD
 SELECT r.title,
@@ -114,12 +115,13 @@ SELECT r.title,
   FROM results r
   JOIN scores s ON s.result_id = r.id
   LEFT OUTER JOIN scores u_s ON u_s.result_id = r.id
+   AND u_s.user_id = ?
  WHERE s.query_id = ?
  GROUP BY s.result_id
  ORDER BY AVG(s.score) DESC
 EOD;
 
-        $res = $this->db->fetchAll($sql, [$queryId]);
+        $res = $this->db->fetchAll($sql, [$user->uid, $queryId]);
         if ($res === false) {
             throw new RuntimeException('Query Failure');
         }

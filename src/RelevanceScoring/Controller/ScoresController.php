@@ -93,7 +93,7 @@ class ScoresController
             throw new \Exception('Not Found');
         }
 
-        $scores = $this->scoresRepo->getScoresForQuery($id);
+        $scores = $this->scoresRepo->getScoresForQuery($this->user, $id);
         if (!$scores) {
             throw new \Exception('No scores available');
         }
