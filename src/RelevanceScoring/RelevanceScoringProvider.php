@@ -85,7 +85,10 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
             return $repo;
         };
         $app['search.repository.scores'] = function () use ($app) {
-            return new Repository\ScoresRepository($app['db']);
+            return new Repository\ScoresRepository(
+                $app['db'],
+                $app['search.importer_limit']
+            );
         };
         $app['search.repository.scoring_queue'] = function () use ($app) {
             return new Repository\ScoringQueueRepository(

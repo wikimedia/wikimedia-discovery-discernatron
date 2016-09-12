@@ -10,10 +10,13 @@ class ScoresRepository
 {
     /** @var Connection */
     private $db;
+    /** @var int */
+    private $maxPosition;
 
-    public function __construct(Connection $db)
+    public function __construct(Connection $db, $maxPosition)
     {
         $this->db = $db;
+        $this->maxPosition = $maxPosition;
     }
 
     /**
@@ -112,16 +115,25 @@ SELECT r.title,
 	   AVG(s.score) as score,
        u_s.score as user_score,
        SUM(IF(s.score IS NULL, 0, 1)) as num_scores
-  FROM results r
+  FROM ( SELECT r.id, r.title
+           FROM results r
+           JOIN results_sources r_s ON r.id = r_s.results_id
+            AND r_s.position <= :maxPosition
+          GROUP BY r.id
+       ) r
   JOIN scores s ON s.result_id = r.id
   LEFT OUTER JOIN scores u_s ON u_s.result_id = r.id
-   AND u_s.user_id = ?
- WHERE s.query_id = ?
+   AND u_s.user_id = :userId
+ WHERE s.query_id = :queryId
  GROUP BY s.result_id
  ORDER BY AVG(s.score) DESC
 EOD;
 
-        $res = $this->db->fetchAll($sql, [$user->uid, $queryId]);
+        $res = $this->db->fetchAll($sql, [
+            'maxPosition' => $this->maxPosition,
+            'userId' => $user->uid,
+            'queryId' => $queryId,
+        ]);
         if ($res === false) {
             throw new RuntimeException('Query Failure');
         }
