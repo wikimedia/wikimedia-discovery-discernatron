@@ -3,10 +3,10 @@ var cards = document.querySelectorAll( '.card' );
 var dropAreas = document.querySelectorAll( '.drop-area' );
 
 var escapeHtml = function ( html ) {
-    var text = document.createTextNode(html);
-    var div = document.createElement('div');
-    div.appendChild(text);
-    return div.innerHTML;
+	var text = document.createTextNode(html);
+	var div = document.createElement('div');
+	div.appendChild(text);
+	return div.innerHTML;
 }
 
 /**
@@ -65,9 +65,9 @@ var Stack = {
 };
 
 var Card = {
-    cardData: {id: '', title:'', snippet:''},
+	cardData: {id: '', title:'', snippet:''},
 	domEl: Element,
-    formEl: Element,
+	formEl: Element,
 	hammerCard: {},
 	x: 0,
 	y: 0,
@@ -124,7 +124,7 @@ var Card = {
 		var droppedAreaXY = newStack.getStackPos();
 		this.setCardXY( droppedAreaXY.x,  droppedAreaXY.y );
 		TweenLite.to( this.domEl, 0.8,{x: this.x, y: this.y, zIndex:this.stack.getCards().length - 1, ease:Elastic.easeOut} );
-        this.formEl.value = newStack.domEl.attributes.getNamedItem('data-score').value;
+		this.formEl.value = newStack.domEl.attributes.getNamedItem('data-score').value;
 	},
 	onPanEnd: function( card ) {
 
@@ -143,23 +143,23 @@ var Card = {
 				}
 				card.setCardXY( 0, 0 );
 				TweenLite.to( card.domEl, 0.8,{ x:"0", y:"0", ease:Elastic.easeOut } );
-                this.formEl.value = "";
+				this.formEl.value = "";
 			}
 		}
 	},
 	createCardDOM: function() {
 		var el = document.createElement('div'),
-            link = window.scoringData.baseWikiUrl + '/' + this.cardData.title;
-            snippet = this.cardData.snippet.split('\uE000').join('<b>').split('\uE001').join('</b>');
+			link = window.scoringData.baseWikiUrl + '/' + this.cardData.title;
+			snippet = this.cardData.snippet.split('\uE000').join('<b>').split('\uE001').join('</b>');
 		el.classList.add('card');
-        // note this isn't safe from XSS. should use document.createElement
+		// note this isn't safe from XSS. should use document.createElement
 		el.innerHTML = "<a target='_blank' href='" + link + "'>" + this.cardData.title + "</a><p>" + snippet + "</p>";
 		this.domEl = el;
 		document.querySelector( '.stack' ).appendChild( this.domEl );
 	},
 	initialize: function(){
 		this.createCardDOM();
-        this.formEl = document.getElementById( 'result_' + this.cardData.id );
+		this.formEl = document.getElementById( 'result_' + this.cardData.id );
 		var hammerCard = this.hammerCard = new Hammer( this.domEl );
 		hammerCard.get( 'pan' ).set( { direction: Hammer.DIRECTION_ALL } );
 		hammerCard.on( 'panstart', this.onPanStart( this ) );
