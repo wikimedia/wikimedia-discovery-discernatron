@@ -41,13 +41,13 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
         $controllers->get('/scores/{id}', 'search.controller.scores:scoresByQueryId')
             ->bind('query_scores');
 
-        $controllers->get('/instructions',      'search.controller.queries:instructions')
+        $controllers->get('/instructions', 'search.controller.queries:instructions')
             ->bind('instructions');
-        $controllers->get('/query',             'search.controller.queries:nextQuery')
+        $controllers->get('/query', 'search.controller.queries:nextQuery')
             ->bind('next_query');
-        $controllers->match('/query/id/{id}',   'search.controller.queries:queryById')
+        $controllers->match('/query/id/{queryId}', 'search.controller.queries:queryById')
             ->bind('query_by_id');
-        $controllers->post('/query/skip/{id}',   'search.controller.queries:skipQueryById')
+        $controllers->post('/query/skip/{queryId}', 'search.controller.queries:skipQueryById')
             ->bind('skip_query_by_id');
 
         return $controllers;
