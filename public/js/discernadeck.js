@@ -159,12 +159,44 @@ var Card = {
 		}
 	},
 	createCardDOM: function() {
-		var el = document.createElement('div'),
-			link = window.scoringData.baseWikiUrl + '/' + this.cardData.title;
-			snippet = this.cardData.snippet.split('\uE000').join('<b>').split('\uE001').join('</b>');
+		var i, b,
+			el = document.createElement('div'),
+			snippetPieces = this.cardData.snippet.split('\uE000').map(function (s) { return s.split('\uE001') }),
+
+			a = document.createElement('a'),
+			p = document.createElement('p');
+
+		a.setAttribute('target', '_blank');
+		a.setAttribute('href', window.scoringData.baseWikiUrl + '/' + this.cardData.title);
+		a.appendChild(document.createTextNode(this.cardData.title));
+
+		/**
+		 * The snippet has markers that indicate which part should be bolded,
+		 * by splitting above we have converted
+		 *   -some+ text that should be -bold+
+		 * into
+		 *  [[""], ["some", " text that should be "], ["bold, ""]]
+		 * This loop then works through those pieces and bolds the appropriate parts.
+		 */
+		for (i = 0; i < snippetPieces.length; i++) {
+			if ( snippetPieces[i].length == 1 ) {
+				if (snippetPieces[i][0].length > 0) {
+					p.appendChild(document.createTextNode(snippetPieces[i][0]));
+				}
+			} else {
+				b = document.createElement('b');
+				b.appendChild(document.createTextNode(snippetPieces[i][0]));
+				p.appendChild(b);
+				if (snippetPieces[i][1].length > 0) {
+					p.appendChild(document.createTextNode(snippetPieces[i][1]));
+				}
+			}
+		}
+
+		el.appendChild(a);
+		el.appendChild(p);
 		el.classList.add('card');
-		// note this isn't safe from XSS. should use document.createElement
-		el.innerHTML = "<a target='_blank' href='" + link + "'>" + this.cardData.title + "</a><p>" + snippet + "</p>";
+
 		this.domEl = el;
 		document.querySelector( '.stack' ).appendChild( this.domEl );
 	},
