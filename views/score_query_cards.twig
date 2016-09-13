@@ -42,10 +42,13 @@
         {% endfor %}
         <div class="row">
             <input type="submit" class="btn btn-default" />
+            <button type="submit" class="btn btn-default" name="cards" value="0">Switch to classic interface</button>
         </div>
-        <div class="error">
-            {{ form_errors(form) }}
-        </div>
+        {% if showErrors %}
+            <div class="error">
+                {{ form_errors(form) }}
+            </div>
+        {% endif %}
     </form>
 
     <div class="row">

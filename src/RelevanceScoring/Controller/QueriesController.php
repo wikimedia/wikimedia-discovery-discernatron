@@ -137,7 +137,7 @@ class QueriesController
         $form = $this->createScoringForm($results);
         $form->handleRequest($request);
 
-        if ($form->isValid()) {
+        if ($form->isValid() && !$request->request->has('cards')) {
             $this->scoresRepo->storeQueryScores($this->user, $queryId, $form->getData());
             $this->scoringQueueRepo->markScored($this->user, $queryId);
 
@@ -154,6 +154,7 @@ class QueriesController
             'saved' => (bool) $request->query->get('saved'),
             'skipForm' => $this->createSkipForm($queryId)->createView(),
             'baseWikiUrl' => $this->getBaseUrl($query['wiki']),
+            'showErrors' => !$request->request->has('cards'),
         ]);
     }
 
@@ -251,6 +252,10 @@ class QueriesController
     private function chooseScoringTemplate(Request $request)
     {
         $fromQuery = $request->query->get('cards', null);
+        if ( $fromQuery === null ) {
+            $fromQuery = $request->request->get('cards', null);
+        }
+
         if ($fromQuery !== null) {
             // override requested
             $interface = (bool) $fromQuery

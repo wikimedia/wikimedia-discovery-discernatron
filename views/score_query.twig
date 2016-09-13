@@ -63,14 +63,18 @@
 
     <div class="row"><h3>Results</h3></div>
 
-    <div class="row">
-        <a class="btn btn-default hidden show-all-snippets">Show all snippets</a>
-        <a class="btn btn-default hidden hide-all-snippets">Hide all snippets</a>
-    </div>
-
     <form method="post" novalidate>
-        {{ form_errors(form) }}
+        <div class="row">
+            <a class="btn btn-default hidden show-all-snippets">Show all snippets</a>
+            <a class="btn btn-default hidden hide-all-snippets">Hide all snippets</a>
+            <button class="btn btn-default" type="submit" name="cards" value="1">Switch to card interface</button>
+        </div>
+
+        {% if showErrors %}
+            {{ form_errors(form) }}
+        {% endif %}
         {{ form_widget(form._token) }}
+
 
         {% for child in form %}
             {% if child.vars.name != '_token' %}
