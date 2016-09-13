@@ -22,8 +22,8 @@ class UsersRepository
     {
         $properties = [
             'name' => $user->name,
-            'edit_count' => $user->extra['editCount'],
-            'scoring_interface' => $user->extra['scoringInterface'],
+            'edit_count' => isset($user->extra['editCount']) ? $user->extra['editCount'] : 0,
+            'scoring_interface' => isset($user->extra['scoringInterface']) ? $user->extra['scoringInterface'] : 'classic',
         ];
 
         if ($this->userExists($user)) {
@@ -75,7 +75,7 @@ class UsersRepository
         $user->name = $row['name'];
         $user->extra = [
             'editCount' => $row['edit_count'],
-            'scoringInterface' => $row['scoringInterface'],
+            'scoringInterface' => $row['scoring_interface'],
         ];
 
         return new Some($user);

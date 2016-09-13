@@ -132,6 +132,7 @@ $app->before(function (Request $request) use ($app) {
             return $app->redirect($app->path('oauth_authorize'));
         }
         $user->extra['last_authorized'] = time();
+        $user->extra['scoringInterface'] = 'classic';
         $app['search.repository.users']->updateUser($user);
         $session->set('user', $user);
     }
