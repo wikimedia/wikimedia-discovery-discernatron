@@ -109,13 +109,18 @@ class QueriesController
             // @todo 404
             throw new \Exception('Query not found');
         }
+        $query = $maybeQuery->get();
+        if ( !$query['imported'] ) {
+            return $this->twig->render('query_not_imported.twig', [
+                'query' => $query,
+            ]);
+        }
 
         $maybeResults = $this->resultsRepo->getQueryResults($queryId);
         if ($maybeResults->isEmpty()) {
             throw new \Exception('No results found for query');
         }
 
-        $query = $maybeQuery->get();
         $results = $this->shufflePreserveKeys(
             $maybeResults->get(),
             // user id is used to give each user a different order,

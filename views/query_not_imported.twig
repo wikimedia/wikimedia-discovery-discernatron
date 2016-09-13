@@ -1,0 +1,9 @@
+{% extends "layout.twig" %}
+
+{% block content %}
+    <div class="row">
+        <h3>Not Imported</h3>
+        <p>This query ({{ query.query}}) has not been imported yet. <a href="{{ path('next_query') }}">Get another query to grade</a></p>
+    </div>
+{% endblock %}
+
