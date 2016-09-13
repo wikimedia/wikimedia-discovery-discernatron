@@ -33,7 +33,7 @@ class MediaWiki extends Server
 
     public function urlAuthorization()
     {
-        return $this->baseUrl.'/authorize';
+        return $this->baseUrl.'/authenticate';
     }
 
     public function urlTokenCredentials()
