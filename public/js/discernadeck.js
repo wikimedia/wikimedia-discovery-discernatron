@@ -142,14 +142,16 @@ var Card = {
 					card.stack.removeCard();
 					card.stack = false;
 				}
-				if ( deck.currentCard ) {
-					deck.moveCardToBottom();
-				}
-				deck.currentCard = card;
-				deck.cardsInDeck.unshift(card.cardData);
+                if ( deck.currentCard !== card ) {
+    				if ( deck.currentCard ) {
+    					deck.moveCardToBottom();
+    				}
+    				deck.currentCard = card;
+    				deck.cardsInDeck.unshift(card.cardData);
+				    card.formEl.value = "";
+                }
 				card.setCardXY( 0, 0 );
 				TweenLite.to( card.domEl, 0.8,{ x:"0", y:"0", ease:Elastic.easeOut } );
-				card.formEl.value = "";
 				if (deck.cardsInDeck.length > 1) {
 					deck.domEl.classList.remove( 'empty' );
 				}
