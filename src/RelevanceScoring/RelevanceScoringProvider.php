@@ -136,7 +136,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                 'https://www.google.com/search',
                 [
                     'is_valid' => '#ires',
-                    'results' => '#rso > .g:not(.g-blk), .srg > .g',
+                    'results' => '#rso > .g:not(.g-blk):not(.obcontainer), .srg > .g',
                     'url' => 'h3 a',
                     'snippet' => ['.st'],
                 ],
