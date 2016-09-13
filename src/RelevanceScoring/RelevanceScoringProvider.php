@@ -122,6 +122,9 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                         '#tab_1 .b_imagePair',
                         // sometimes there is no tab 1
                         '#tab_2 .b_imagePair',
+                        // sometimes its an unlabeled span rather than .b_imagePair
+                        '#tab_1 .b_vList span',
+                        '#tab_2 .b_vList span',
                     ],
                 ],
                 '<strong>',
