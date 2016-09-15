@@ -2,16 +2,6 @@ var dropAreas = document.querySelectorAll( '.drop-area' );
 
 var stacks = document.querySelectorAll( '.drop-area' );
 
-/**
- * State machine fun time
- * stack has many cards
- * card has stack || deck
- *
- * Card can move
- *
- * Stack can click
- */
-
 var Stack = {
 	domEl: Element,
 	DROP_GAP: 25,
@@ -23,9 +13,7 @@ var Stack = {
 	addCard: function( card ){
 		this.cards.push( card );
 	},
-	removeCard: function( card ) {
-		//( this.gap - this.DROP_GAP < 0 ) ? this.gap = 15 : this.gap -= this.DROP_GAP ;
-		this.cards.splice( this.cards.indexOf( card ), 1 );
+	reorganizeCardsInStack: function() {
 
 		var stack = this;
 		var stackXY = this.getStackPos();
@@ -36,19 +24,24 @@ var Stack = {
 			TweenLite.to( card.domEl, 0.8,{x: stackXY.x, y: stackXY.y - (stack.DROP_GAP * (reverseIndex -1 ) ), zIndex: stack.cards.length - reverseIndex, ease:Elastic.easeOut} );
 			card.setCardXY( stackXY.x, stackXY.y + stack.gap - (( reverseIndex - 1) * stack.DROP_GAP ));
 		}
+
+	},
+	removeCard: function( card ) {
+		this.cards.splice( this.cards.indexOf( card ), 1 );
+		this.reorganizeCardsInStack();
 	},
 	onTap: function ( stack ) {
 		return function( ev ) {
 			if ( stack.deck.currentCard ) {
-				stack.deck.currentCard.moveCardToStack( false, stack );
+				stack.deck.currentCard.moveCardToStack( stack.deck, stack );
 			} else {
 				stack.deck.revealCard(stack.deck)();
 			}
 		}
 	},
 	getStackPos: function () {
-		var stackX = parseInt( window.getComputedStyle( this.domEl )[ 'left'].match( /\-\d+|\d+/g )[ 0 ] );
-		var stackY = parseInt( window.getComputedStyle( this.domEl )[ 'top' ].match( /\-\d+|\d+/g )[ 0 ] );
+		var stackX = parseInt( window.getComputedStyle( this.domEl )[ 'left'].match( /\-\d+|\d+/g )[ 0 ], 10 );
+		var stackY = parseInt( window.getComputedStyle( this.domEl )[ 'top' ].match( /\-\d+|\d+/g )[ 0 ], 10 );
 		return { x: stackX, y: stackY + this.gap + ( this.cards.length * this.DROP_GAP ) }
 	},
 	initialize: function() {
@@ -58,7 +51,9 @@ var Stack = {
 };
 
 var Card = {
-	cardData: {id: '', title:'', snippet:''},
+	id: '',
+	title: '',
+	snippet: '',
 	domEl: Element,
 	formEl: Element,
 	hammerCard: {},
@@ -70,7 +65,7 @@ var Card = {
 		this.x = x;
 		this.y = y;
 	},
-	isCollision: function ( dropAreaEl ) {
+	hasCollidedWith: function ( dropAreaEl ) {
 
 		var a = this.domEl.getBoundingClientRect();
 		var b = dropAreaEl.getBoundingClientRect();
@@ -89,7 +84,7 @@ var Card = {
 	findDropCollision: function ( dropAreas ) {
 		var droppedArea = false;
 		for ( var i = 0; i < dropAreas.length; i++ ) {
-			droppedArea = this.isCollision( dropAreas[i] );
+			droppedArea = this.hasCollidedWith( dropAreas[i] );
 			if (droppedArea) break;
 		}
 		return droppedArea;
@@ -118,12 +113,26 @@ var Card = {
 		}
 	},
 	moveCardToStack: function( oldStack, newStack ){
-		this.deck.removeFromDeck( this );
+
+		if ( this.deck === oldStack || !oldStack) {
+			this.deck.removeFromDeck( this );
+		}
+
+		if ( this.deck === newStack ) {
+			this.deck.addCardToDeck( this );
+		}
+
+		if ( oldStack && this.deck !== oldStack ) {
+			this.stack.removeCard( this );
+		}
+
 		newStack.addCard(this);
+
 		this.stack = newStack;
-		var droppedAreaXY = newStack.getStackPos();
-		this.setCardXY( droppedAreaXY.x,  droppedAreaXY.y );
-		TweenLite.to( this.domEl, 0.2,{x: this.x, y: this.y, zIndex:this.stack.getCards().length - 1, ease:Power4.easeOut} );
+
+		var newStackXY = newStack.getStackPos();
+		this.setCardXY( newStackXY.x,  newStackXY.y );
+		TweenLite.to( this.domEl, 0.2,{x: newStackXY.x, y: newStackXY.y, zIndex:newStack.getCards().length - 1, ease:Power4.easeOut} );
 		this.formEl.value = newStack.domEl.attributes.getNamedItem('data-score').value;
 	},
 	onPanEnd: function( card ) {
@@ -136,20 +145,19 @@ var Card = {
 			if ( droppedArea ) {
 				card.moveCardToStack( card.stack, droppedArea.stack );
 			} else {
-
 				// jump back to deck
 				if ( card.stack ) {
 					card.stack.removeCard();
 					card.stack = false;
 				}
-                if ( deck.currentCard !== card ) {
-    				if ( deck.currentCard ) {
-    					deck.moveCardToBottom();
-    				}
-    				deck.currentCard = card;
-    				deck.cardsInDeck.unshift(card.cardData);
-				    card.formEl.value = "";
-                }
+				if ( deck.currentCard !== card ) {
+					if ( deck.currentCard ) {
+						deck.moveCardToBottom();
+					}
+					deck.currentCard = card;
+					deck.addCardToDeck( card );
+					card.formEl.value = "";
+				}
 				card.setCardXY( 0, 0 );
 				TweenLite.to( card.domEl, 0.8,{ x:"0", y:"0", ease:Elastic.easeOut } );
 				if (deck.cardsInDeck.length > 1) {
@@ -161,14 +169,15 @@ var Card = {
 	createCardDOM: function() {
 		var i, b,
 			el = document.createElement('div'),
-			snippetPieces = this.cardData.snippet.split('\uE000').map(function (s) { return s.split('\uE001') }),
+			snippetPieces = this.snippet.split('\uE000').map(function (s) { return s.split('\uE001') });
 
-			a = document.createElement('a'),
-			p = document.createElement('p');
+
+		var a = document.createElement('a');
+		var p = document.createElement('p');
 
 		a.setAttribute('target', '_blank');
-		a.setAttribute('href', window.scoringData.baseWikiUrl + '/' + this.cardData.title);
-		a.appendChild(document.createTextNode(this.cardData.title));
+		a.setAttribute('href', window.scoringData.baseWikiUrl + '/' + this.title);
+		a.appendChild(document.createTextNode(this.title));
 
 		/**
 		 * The snippet has markers that indicate which part should be bolded,
@@ -184,7 +193,7 @@ var Card = {
 					p.appendChild(document.createTextNode(snippetPieces[i][0]));
 				}
 			} else {
-				b = document.createElement('b');
+				b = document.createElement('strong');
 				b.appendChild(document.createTextNode(snippetPieces[i][0]));
 				p.appendChild(b);
 				if (snippetPieces[i][1].length > 0) {
@@ -198,11 +207,13 @@ var Card = {
 		el.classList.add('card');
 
 		this.domEl = el;
-		document.querySelector( '.stack' ).appendChild( this.domEl );
+	},
+	renderCardIn: function( domEl ) {
+		domEl.appendChild( this.domEl );
 	},
 	initialize: function(){
 		this.createCardDOM();
-		this.formEl = document.getElementById( 'result_' + this.cardData.id );
+		this.formEl = document.getElementById( 'result_' + this.id );
 		var hammerCard = this.hammerCard = new Hammer( this.domEl );
 		hammerCard.get( 'pan' ).set( { direction: Hammer.DIRECTION_ALL } );
 		hammerCard.on( 'panstart', this.onPanStart( this ) );
@@ -215,40 +226,63 @@ var Card = {
 var Deck = {
 	domEl: Element,
 	counterEl: Element,
+	flippedDomEl: Element,
 	cardsInDeck: [],
 	hammerDeck: Object,
 	currentCard: false,
-	initializeDeck: function( onDone ) {
-		// maybe do some ajax stuff?
+	initializeDeck: function() {
 		var deck = this;
-		window.setTimeout( function(){
+		//deck.cardsInDeck = window.scoringData.results;
 
-			deck.cardsInDeck = window.scoringData.results;
-			deck.setCardCounter();
-			deck.hammerDeck = new Hammer( deck.domEl );
-			deck.hammerDeck.on( 'tap', deck.revealCard( deck ) );
-			onDone && onDone();
-			deck.revealCard(deck)();
-		}, 500 )
+		window.scoringData.results.forEach(function( cardObj, i) {
+			deck.addCardToDeck( cardObj );
+		} );
+		deck.hammerDeck = new Hammer( deck.domEl );
+		deck.hammerDeck.on( 'tap', deck.revealCard( deck ) );
+		//reveal the first card
+
+		deck.revealCard(deck)();
+		deck.setCardCounter();
+		deck.assignExistingScores();
+	},
+	assignExistingScores: function() {
+		// assign already scored cards
+		var inputs = document.querySelectorAll( 'input.result-score' ),
+			stacksByScore = {};
+		if (inputs.length === 0) {
+			return;
+		}
+		for ( var i = 0; i < stacks.length; i++) {
+			var stackEl = stacks[i];
+			stacksByScore[stackEl.attributes.getNamedItem('data-score').value] = stackEl.stack;
+		}
+		for ( var i = inputs.length -1; i >= 0; i-- ) {
+			switch(inputs[i].value) {
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+					var position = deck.findPosition(deck, parseInt( inputs[i].dataset.id, 10 ) ),
+						score = inputs[i].value;
+					var card = deck.cardsInDeck[position];
+					card.renderCardIn( deck.flippedDomEl );
+					card.moveCardToStack(this, stacksByScore[score]);
+					break;
+			}
+		}
 	},
 	setCardCounter: function() {
 		this.counterEl.innerHTML = this.cardsInDeck.length;
 	},
-	createCard: function( deck, position ) {
-		var card = Object.create(Card, {
-			cardData: {writable: true, configurable: true, value: deck.cardsInDeck[position]},
-			deck: {writable: true, configurable: true, value: deck}
-		});
-		card.initialize();
-		return card;
-	},
 	findPosition: function( deck, id ) {
+		var index = -1;
+
 		for (var i = 0; i < deck.cardsInDeck.length; i++) {
 			if (deck.cardsInDeck[i].id == id) {
-				return i;
+				index = i;
 			}
 		}
-		throw "unknown card";
+		return index;
 	},
 	revealCard: function( deck ) {
 
@@ -258,8 +292,8 @@ var Deck = {
 			}
 
 			if ( deck.cardsInDeck.length > 0 ) {
-				var card = deck.createCard(deck, 0);
-				deck.currentCard = card;
+				deck.cardsInDeck[0].renderCardIn( deck.flippedDomEl );
+				deck.currentCard = deck.cardsInDeck[0];
 			}
 			if ( deck.cardsInDeck.length <= 1 ) {
 				deck.domEl.classList.add( 'empty' );
@@ -268,19 +302,44 @@ var Deck = {
 		}
 	},
 	removeFromDeck: function( card ) {
-		var cardIndex = this.cardsInDeck.indexOf( card.cardData );
+		var cardIndex = this.findPosition( this, card.id);
 		if ( cardIndex >= 0 ) {
-			this.cardsInDeck.splice( this.cardsInDeck.indexOf( card.cardData ), 1 );
+			this.cardsInDeck.splice( this.cardsInDeck.indexOf( card ), 1 );
 			this.currentCard = false;
 			this.setCardCounter();
 			this.revealCard( this )();
 		}
+
+		if ( this.cardsInDeck.length > 0 ) {
+			this.currentCard = this.cardsInDeck[0];
+		}
+	},
+	addCardToDeck: function( cardData ) {
+
+		if ( cardData.isPrototypeOf( Card )  ) {
+			this.cardsInDeck.push( cardData );
+			this.currentCard = cardData;
+		} else {
+			var card = Object.create(Card, {
+				cardData: {writable: true, configurable: true, value: cardData },
+				deck: {writable: true, configurable: true, value: deck},
+				id : {writable: true, configurable: true, value: cardData.id},
+				title:  {writable: true, configurable: true, value: cardData.title},
+				snippet:  {writable: true, configurable: true, value: cardData.snippet}
+			});
+			card.initialize();
+			this.cardsInDeck.push( card );
+		}
+
+		this.setCardCounter();
 	},
 	moveCardToBottom: function(){
 		var cards = this.cardsInDeck;
 		var currentCard = cards.shift();
 		this.cardsInDeck.push(currentCard);
-		this.currentCard.domEl.parentNode.removeChild( this.currentCard.domEl );
+		if ( this.currentCard.domEl.parentNode ) {
+			this.currentCard.domEl.parentNode.removeChild( this.currentCard.domEl );
+		}
 		this.currentCard = false;
 	}
 };
@@ -288,34 +347,8 @@ var Deck = {
 var deck = Object.create( Deck, {
 	domEl: {writable: true, configurable: true, value: document.querySelector('.card-deck') },
 	counterEl:  {writable: true, configurable: true, value: document.querySelector('.deck-counter') },
+	flippedDomEl: {writable: true, configurable: true, value: document.querySelector('.card-deck').nextElementSibling }
 });
-
-deck.initializeDeck( function () {
-	// assign already scored cards
-	var inputs = document.querySelectorAll( 'input.result-score' ),
-		stacksByScore = {};
-	if (inputs.length === 0) {
-		return;
-	}
-	for ( var i = 0; i < stacks.length; i++) {
-		var stackEl = stacks[i];
-		stacksByScore[stackEl.attributes.getNamedItem('data-score').value] = stackEl.stack;
-	}
-	for ( var i = 0; i < inputs.length; i++ ) {
-		switch(inputs[i].value) {
-		case '0':
-		case '1':
-		case '2':
-		case '3':
-			var position = deck.findPosition(deck, inputs[i].attributes.getNamedItem('data-id').value),
-				card = deck.createCard(deck, position),
-				score = inputs[i].value;
-			card.moveCardToStack(false, stacksByScore[score]);
-			break;
-		}
-	}
-});
-
 
 for ( var i = 0; i < stacks.length; i++ ) {
 	var stack = Object.create( Stack, {
@@ -327,3 +360,4 @@ for ( var i = 0; i < stacks.length; i++ ) {
 	stacks[i].stack.initialize();
 }
 
+deck.initializeDeck();
