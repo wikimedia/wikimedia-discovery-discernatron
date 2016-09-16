@@ -20,8 +20,8 @@ var Stack = {
 
 		for ( var i = 0; i < this.cards.length; i++ ) {
 			var card = this.cards[i];
-			var reverseIndex = this.cards.length - i ;
-			TweenLite.to( card.domEl, 0.8,{x: stackXY.x, y: stackXY.y - (stack.DROP_GAP * (reverseIndex -1 ) ), zIndex: stack.cards.length - reverseIndex, ease:Elastic.easeOut} );
+			var reverseIndex = this.cards.length - i - 1 ;
+			TweenLite.to( card.domEl, 0.8,{x: stackXY.x, y: stackXY.y - (stack.DROP_GAP * (reverseIndex ) ), zIndex: stack.cards.length - reverseIndex, ease:Elastic.easeOut} );
 			card.setCardXY( stackXY.x, stackXY.y + stack.gap - (( reverseIndex - 1) * stack.DROP_GAP ));
 		}
 
@@ -132,7 +132,7 @@ var Card = {
 
 		var newStackXY = newStack.getStackPos();
 		this.setCardXY( newStackXY.x,  newStackXY.y );
-		TweenLite.to( this.domEl, 0.2,{x: newStackXY.x, y: newStackXY.y, zIndex:newStack.getCards().length - 1, ease:Power4.easeOut} );
+		TweenLite.to( this.domEl, 0.2,{x: newStackXY.x, y: newStackXY.y, zIndex:newStack.getCards().length, ease:Power4.easeOut} );
 		this.formEl.value = newStack.domEl.attributes.getNamedItem('data-score').value;
 	},
 	onPanEnd: function( card ) {
@@ -230,6 +230,9 @@ var Deck = {
 	cardsInDeck: [],
 	hammerDeck: Object,
 	currentCard: false,
+	getCards: function() {
+		return this.cardsInDeck;
+	},
 	initializeDeck: function() {
 		var deck = this;
 		//deck.cardsInDeck = window.scoringData.results;
@@ -269,6 +272,25 @@ var Deck = {
 					card.moveCardToStack(this, stacksByScore[score]);
 					break;
 			}
+		}
+		this.validateForm();
+	},
+	validateForm: function(){
+		var inputsTotal = document.querySelectorAll( '.result-score').length;
+
+		var eightyPercent = Math.ceil( inputsTotal * 0.8 );
+
+		var totalScored = inputsTotal - this.cardsInDeck.length;
+
+		var remainingToEighty = eightyPercent - totalScored;
+
+		if ( totalScored >= eightyPercent ){
+			document.getElementById( 'submit-score-btn').removeAttribute('disabled');
+			document.getElementById('remaining-card-counter').innerText = "You've scored enough cards to submit this query."
+		} else {
+			document.getElementById( 'submit-score-btn').setAttribute('disabled', 'disabled');
+			document.getElementById('remaining-card-counter').innerText = 'Score at least ' + remainingToEighty + ' more cards to submit this query.'
+
 		}
 	},
 	setCardCounter: function() {
@@ -313,6 +335,8 @@ var Deck = {
 		if ( this.cardsInDeck.length > 0 ) {
 			this.currentCard = this.cardsInDeck[0];
 		}
+
+		this.validateForm();
 	},
 	addCardToDeck: function( cardData ) {
 
@@ -332,6 +356,7 @@ var Deck = {
 		}
 
 		this.setCardCounter();
+		this.validateForm();
 	},
 	moveCardToBottom: function(){
 		var cards = this.cardsInDeck;
@@ -361,3 +386,14 @@ for ( var i = 0; i < stacks.length; i++ ) {
 }
 
 deck.initializeDeck();
+
+
+/**
+ * Menu functions.
+ */
+$(document).ready(function(){
+	$('.query-links-label').click(function(){
+		$('.query-links-content').toggle();
+	});
+
+});

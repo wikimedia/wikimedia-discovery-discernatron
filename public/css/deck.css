@@ -7,7 +7,7 @@ body {
     background-color: #dadada;
     color: #2F3133;
     height: 100%;
-    background-image: radial-gradient(#95c791, #628060);
+    background-image: radial-gradient(#54a56d, #37844f);
 }
 
 /* When using a hidden input field chromes Back/Forward
@@ -40,9 +40,25 @@ em {
     font-weight: bold;
 }
 
-.skip-query-container {
+.query-form-container {
     float: left;
     padding-right: 1em;
+    margin-bottom: 6px;
+}
+
+.score-query button.switch-ui {
+    background-color: transparent;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    color: #fff;
+    margin-left: 5px;
+}
+
+
+.score-query input.submit-scores {
+    width: 100%;
+    margin-top: 1em;
 }
 
 .info {
@@ -59,20 +75,127 @@ em {
 }
 
 .query {
-    margin-top: 0;
-    margin-bottom: 0;
+    text-align: center;
+    border-bottom: 1px solid;
+    font-size: 18px;
+    display: block;
+    border-top: 1px solid;
+}
+
+.query-info {
+    display: block;
+    width: 60%;
+    float: left;
+    text-align: center;
+    padding-right: 10px;
+}
+
+.query-actions {
+    float: left;
+    width: 40%;
+}
+
+.query-actions .glyphicon {
+    margin-right: 5px;
+}
+
+.query-actions .glyphicon-step-forward {
+    margin-left:0;
+    padding-left: 0;
+}
+
+.query-links-label {
+    cursor: pointer;
+}
+.query-links-label:hover {
+    text-decoration: underline;
+}
+
+.query-links {
+    width: 100%;
+    margin-bottom: 6px;
+}
+
+.query-links-content {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.skip-query {
+    display: inline-block;
+}
+
+.skip-query .btn {
+    display: inline;
+    background-color: transparent;
+    border: none;
+    padding: 0;
+}
+
+.skip-query .btn:hover{
+    text-decoration: underline;
+}
+
+.section-label {
+    text-align: center;
+    font-size: 12px;
+    display: block;
+    padding-right: 0.5em;
+}
+
+.search-icon {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    font-size: 0;
+    overflow: hidden;
+    line-height:24px;
+    vertical-align: middle;
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+.search-icon img {
+    -webkit-filter: grayscale(1) contrast(2);
+    -moz-filter: grayscale(1) contrast(2);
+    filter:  grayscale(1) contrast(2);
+    max-width: 100%;
+    max-height: 100%;
+    vertical-align: middle;
+}
+
+.search-icon:hover img {
+    -webkit-filter: none;
+    -moz-filter: none;
+    filter: none;
+}
+
+.icon-ddg {
+}
+
+.icon-goog{
+}
+
+.icon-yahoo {
+}
+
+.icon-bing {
 }
 
 .deck-counter-description{
     text-align: center;
     color: white;
+    margin-bottom: 16px;
+    margin-top: 0px;
+    clear: both;
 }
 
 .deck-counter{
     display: block;
     font-family: georgia;
-    font-size: 58px;
-    line-height: 88px;
+    font-size: 50px;
+    line-height: 53px;
+    padding-bottom: 12px;
 }
 
 .card {

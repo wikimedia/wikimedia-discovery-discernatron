@@ -23,9 +23,6 @@
 {% endblock %}
 
 {% block content %}
-    <div class='skip-query-container'>
-        {{ form(skipForm, {'attr': {'class': 'skip-query'}}) }}
-    </div>
 
     <noscript>
         <div class="errors">
@@ -33,42 +30,77 @@
         </div>
     </noscript>
 
-    <form class="score-query" method="post" novalidate>
-        {{ form_widget(form._token) }}
-        {% for child in form %}
-            {% if child.vars.name != '_token' %}
-                <input class="result-score" type="text" id="result_{{child.vars.name}}" name="{{child.vars.full_name}}" value="{{child.vars.value}}" data-id="{{child.vars.name}}">
-            {% endif %}
-        {% endfor %}
-        <div class="row">
-            <input type="submit" class="btn btn-default" />
-            <button type="submit" class="btn btn-default" name="cards" value="0">Switch to classic interface</button>
-        </div>
-        {% if showErrors %}
-            <div class="error">
-                {{ form_errors(form) }}
-            </div>
-        {% endif %}
-    </form>
-
     <div class="row">
 
         <div class="info">
-            <small class="query-label">query</small>
-            <h1 class="query">{{ query.query }}</h1>
-        </div>
-    
-        <div class="stack-position">
-    
-            <div class="card-deck"></div>
-    
-            <div class="stack"/>
+
+            <div class="query-info">
+                <span class="section-label">Your query:</span><span class="query">{{ query.query }}</span>
+
                 <div class="deck-counter-description">
                     <span class="deck-counter">{{ resultsList|length }}</span>
                     cards left in this deck.
                 </div>
-            </span>
-    
+
+            </div>
+
+            <div class="query-actions">
+
+
+                <div class="query-links">
+                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                    <span class="query-links-label">Search this query</span>
+                    <div class="query-links-content" style="display:none">
+                        <a class="search-icon icon-ddg" href="https://duckduckgo.com/?q={{ query.query }}" target="_blank">
+                            <img src="/img/duckduckgo.svg"/>
+                        </a>
+                        <a class="search-icon icon-goog" href="https://www.google.com/?q={{ query.query }}" target="_blank">
+                            <img src="/img/google.svg"/>
+                        </a>
+                        <a class="search-icon icon-yahoo" href="https://search.yahoo.com/search?p={{ query.query }}" target="_blank">
+                            <img src="/img/yahoo.svg"/>
+                        </a>
+                        <a class="search-icon icon-bing" href="http://www.bing.com/search?q={{ query.query }}" target="_blank">
+                            <img src="/img/bing.svg"/>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='query-form-container'>
+                    <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
+                    {{ form(skipForm, {'attr': {'class': 'skip-query'}}) }}
+                </div>
+
+                <form class="score-query" method="post" novalidate>
+                    {{ form_widget(form._token) }}
+                    {% for child in form %}
+                        {% if child.vars.name != '_token' %}
+                            <input class="result-score" type="text" id="result_{{child.vars.name}}" name="{{child.vars.full_name}}" value="{{child.vars.value}}" data-id="{{child.vars.name}}">
+                        {% endif %}
+                    {% endfor %}
+
+                    <span class="glyphicon glyphicon-eye-open"></span><button type="submit" class="btn btn-default switch-ui" name="cards" value="0">Switch to classic</button>
+                    <input type="submit" class="btn btn-default submit-scores" value="Submit scores" id="submit-score-btn" disabled />
+
+                    <small id="remaining-card-counter">
+                        At least x cards must be ranked to submit this query.
+                    </small>
+
+                    {% if showErrors %}
+                        <div class="error">
+                            {{ form_errors(form) }}
+                        </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <div class="stack-position">
+
+            <div class="card-deck"></div>
+
+            <div class="stack"/></div>
+
             <div class="drop-area irrelevant" data-score="0">
                 <span class="drop-area-label"> Irrelevant </span>
                 <p class="drop-area-description">
@@ -93,7 +125,7 @@
                     A result is Relevant if you would expect to find it in the top 5 results for a query. Use this ranking sparingly.
                 </p>
             </div>
-        </div>    
+        </div>
     </div>
 {% endblock %}
 
