@@ -20,11 +20,10 @@ var Stack = {
 
 		for ( var i = 0; i < this.cards.length; i++ ) {
 			var card = this.cards[i];
-			var reverseIndex = this.cards.length - i - 1 ;
+			var reverseIndex = this.cards.length - 1 - i;
 			TweenLite.to( card.domEl, 0.8,{x: stackXY.x, y: stackXY.y - (stack.DROP_GAP * (reverseIndex ) ), zIndex: stack.cards.length - reverseIndex, ease:Elastic.easeOut} );
-			card.setCardXY( stackXY.x, stackXY.y + stack.gap - (( reverseIndex - 1) * stack.DROP_GAP ));
+			card.setCardXY( stackXY.x, stackXY.y - (stack.DROP_GAP * (reverseIndex ) ) );
 		}
-
 	},
 	removeCard: function( card ) {
 		this.cards.splice( this.cards.indexOf( card ), 1 );
@@ -32,8 +31,10 @@ var Stack = {
 	},
 	onTap: function ( stack ) {
 		return function( ev ) {
-			if ( stack.deck.currentCard ) {
-				stack.deck.currentCard.moveCardToStack( stack.deck, stack );
+			var card = stack.deck.currentCard;
+			if ( card ) {
+				card.addCardToStack( stack );
+				card.animateTo( stack );
 			} else {
 				stack.deck.revealCard(stack.deck)();
 			}
@@ -92,10 +93,7 @@ var Card = {
 	onPanStart: function( card ) {
 		return function( ev ) {
 			card.domEl.classList.add('active');
-			if (card.stack) {
-				card.stack.removeCard( card );
-				card.stack = false;
-			}
+			card.removeCardFromStack( card.stack );
 		}
 	},
 	onPan: function ( card ) {
@@ -112,28 +110,40 @@ var Card = {
 			}
 		}
 	},
-	moveCardToStack: function( oldStack, newStack ){
+	removeCardFromStack: function ( stack ) {
 
-		if ( this.deck === oldStack || !oldStack) {
-			this.deck.removeFromDeck( this );
+		if ( Deck.isPrototypeOf( stack ) ) {
+			stack.removeFromDeck( this );
 		}
 
-		if ( this.deck === newStack ) {
-			this.deck.addCardToDeck( this );
+		if ( Stack.isPrototypeOf( stack ) ) {
+			stack.removeCard( this );
+		}
+		this.stack = false;
+	},
+	addCardToStack: function( stack ) {
+
+		if ( this.stack ) {
+			this.removeCardFromStack( this.stack )
 		}
 
-		if ( oldStack && this.deck !== oldStack ) {
-			this.stack.removeCard( this );
+		if ( Deck.isPrototypeOf( stack ) ) {
+			stack.addCardToDeck( this );
 		}
 
-		newStack.addCard(this);
-
-		this.stack = newStack;
-
-		var newStackXY = newStack.getStackPos();
+		if ( Stack.isPrototypeOf( stack ) ) {
+			stack.addCard( this );
+		}
+		this.stack = stack;
+		this.setFormVal( stack.domEl.dataset.score );
+	},
+	animateTo: function( newStack ){
+		var newStackXY = ( newStack.getStackPos ) ? newStack.getStackPos() : {x:0, y:0};
 		this.setCardXY( newStackXY.x,  newStackXY.y );
 		TweenLite.to( this.domEl, 0.2,{x: newStackXY.x, y: newStackXY.y, zIndex:newStack.getCards().length, ease:Power4.easeOut} );
-		this.formEl.value = newStack.domEl.attributes.getNamedItem('data-score').value;
+	},
+	setFormVal: function( val ){
+		this.formEl.value = val;
 	},
 	onPanEnd: function( card ) {
 
@@ -143,23 +153,18 @@ var Card = {
 
 			var droppedArea = card.findDropCollision( dropAreas );
 			if ( droppedArea ) {
-				card.moveCardToStack( card.stack, droppedArea.stack );
+				card.addCardToStack( droppedArea.stack );
+				card.animateTo( droppedArea.stack );
 			} else {
-				// jump back to deck
-				if ( card.stack ) {
-					card.stack.removeCard();
-					card.stack = false;
-				}
-				if ( deck.currentCard !== card ) {
+
+				if ( card !== deck.currentCard  ) {
 					if ( deck.currentCard ) {
-						deck.moveCardToBottom();
+						deck.hideCurrentCard();
 					}
 					deck.currentCard = card;
 					deck.addCardToDeck( card );
-					card.formEl.value = "";
 				}
-				card.setCardXY( 0, 0 );
-				TweenLite.to( card.domEl, 0.8,{ x:"0", y:"0", ease:Elastic.easeOut } );
+				card.animateTo( deck );
 				if (deck.cardsInDeck.length > 1) {
 					deck.domEl.classList.remove( 'empty' );
 				}
@@ -235,15 +240,14 @@ var Deck = {
 	},
 	initializeDeck: function() {
 		var deck = this;
-		//deck.cardsInDeck = window.scoringData.results;
 
 		window.scoringData.results.forEach(function( cardObj, i) {
 			deck.addCardToDeck( cardObj );
 		} );
 		deck.hammerDeck = new Hammer( deck.domEl );
 		deck.hammerDeck.on( 'tap', deck.revealCard( deck ) );
-		//reveal the first card
 
+		//reveal the first card
 		deck.revealCard(deck)();
 		deck.setCardCounter();
 		deck.assignExistingScores();
@@ -269,7 +273,8 @@ var Deck = {
 						score = inputs[i].value;
 					var card = deck.cardsInDeck[position];
 					card.renderCardIn( deck.flippedDomEl );
-					card.moveCardToStack(this, stacksByScore[score]);
+					card.addCardToStack( stacksByScore[score] );
+					card.animateTo( stacksByScore[score] );
 					break;
 			}
 		}
@@ -292,19 +297,18 @@ var Deck = {
 			document.getElementById('remaining-card-counter').innerText = 'Score at least ' + remainingToEighty + ' more cards to submit this query.'
 
 		}
+
 	},
 	setCardCounter: function() {
 		this.counterEl.innerHTML = this.cardsInDeck.length;
 	},
 	findPosition: function( deck, id ) {
-		var index = -1;
-
 		for (var i = 0; i < deck.cardsInDeck.length; i++) {
 			if (deck.cardsInDeck[i].id == id) {
-				index = i;
+				return i;
 			}
 		}
-		return index;
+		throw 'unknown card';
 	},
 	revealCard: function( deck ) {
 
@@ -339,12 +343,15 @@ var Deck = {
 		this.validateForm();
 	},
 	addCardToDeck: function( cardData ) {
+		var card;
 
-		if ( cardData.isPrototypeOf( Card )  ) {
-			this.cardsInDeck.push( cardData );
-			this.currentCard = cardData;
+		if ( Card.isPrototypeOf(cardData)  ) {
+			card = cardData;
+			this.cardsInDeck.push( card );
+			this.currentCard = card;
+			card.stack = this;
 		} else {
-			var card = Object.create(Card, {
+			card = Object.create(Card, {
 				cardData: {writable: true, configurable: true, value: cardData },
 				deck: {writable: true, configurable: true, value: deck},
 				id : {writable: true, configurable: true, value: cardData.id},
@@ -353,10 +360,18 @@ var Deck = {
 			});
 			card.initialize();
 			this.cardsInDeck.push( card );
+			card.stack = this;
 		}
 
+		card.setFormVal( '' );
 		this.setCardCounter();
 		this.validateForm();
+	},
+	hideCurrentCard: function() {
+		if ( this.currentCard.domEl.parentNode ) {
+			this.currentCard.domEl.parentNode.removeChild( this.currentCard.domEl );
+		}
+		this.currentCard = false;
 	},
 	moveCardToBottom: function(){
 		var cards = this.cardsInDeck;
