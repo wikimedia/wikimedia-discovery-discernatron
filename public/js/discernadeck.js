@@ -12,6 +12,7 @@ var Stack = {
 	getCards: function(){ return this.cards },
 	addCard: function( card ){
 		this.cards.push( card );
+		this.setDomElHeight();
 	},
 	reorganizeCardsInStack: function() {
 
@@ -24,6 +25,10 @@ var Stack = {
 			TweenLite.to( card.domEl, 0.8,{x: stackXY.x, y: stackXY.y - (stack.DROP_GAP * (reverseIndex ) ), zIndex: stack.cards.length - reverseIndex, ease:Elastic.easeOut} );
 			card.setCardXY( stackXY.x, stackXY.y - (stack.DROP_GAP * (reverseIndex ) ) );
 		}
+		this.setDomElHeight();
+	},
+	setDomElHeight: function(){
+		this.domEl.style.height =  this.cards.length * this.DROP_GAP + 250 + this.gap + 'px';
 	},
 	removeCard: function( card ) {
 		this.cards.splice( this.cards.indexOf( card ), 1 );
@@ -101,11 +106,25 @@ var Card = {
 			var offsetX = card.x + ev.deltaX;
 			var offsetY = card.y + ev.deltaY;
 			TweenLite.set( card.domEl, {x: offsetX, y: offsetY} );
+
+			var hasCollided = card.findDropCollision( dropAreas ) || deck.flippedDomEl;
+
+			hasCollided.classList.add('active-stack');
+
+			if ( deck.flippedDomEl !== hasCollided ) {
+				deck.flippedDomEl.classList.remove('active-stack');
+			}
+			Array.prototype.forEach.call(dropAreas, function( dropArea ){
+				if ( dropArea !== hasCollided ) {
+					dropArea.classList.remove('active-stack');
+				}
+			});
 		}
 	},
 	onDoubleTap: function( card ) {
 		return function( ev ) {
-			if ( card.stack && card.stack.cards.indexOf(card) === card.stack.cards.length - 1 ) {
+			var cardsInStack = ( card.stack ) ? card.stack.cards : [];
+			if ( Stack.isPrototypeOf( card.stack ) && cardsInStack[cardsInStack.length - 1] === card ) {
 				card.stack.onTap( card.stack )();
 			}
 		}
@@ -150,6 +169,11 @@ var Card = {
 		return function( ev ) {
 
 			card.domEl.classList.remove( 'active' );
+			deck.flippedDomEl.classList.remove('active-stack');
+
+			Array.prototype.forEach.call(dropAreas, function( dropArea ){
+					dropArea.classList.remove('active-stack');
+			});
 
 			var droppedArea = card.findDropCollision( dropAreas );
 			if ( droppedArea ) {

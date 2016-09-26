@@ -62,12 +62,12 @@ em {
 }
 
 .info {
-    background-color: rgba(0,0,0,0.2);
+    background-color: rgba(0, 0, 0, 0.25);
     border-radius: 5px;
     height: 250px;
     left: 50%;
     position: relative;
-    width: 365px;
+    width: 385px;
     padding: 12px 12px 0 12px;
     margin-left: 18px;
     color: white;
@@ -262,7 +262,7 @@ em {
 .drop-area {
     position: absolute;
     top: 275px;
-    background-color: transparent;
+    background-color: rgba(0, 0, 0, 0.25);
     width: 180px;
     height: 250px;
     border-radius: 5px;
@@ -271,7 +271,6 @@ em {
     z-index: 0;
     box-shadow: 0 1px 3px 0px rgba(0,0,0,0.1);
     cursor: pointer;
-    border: 2px solid;
 }
 
 .drop-area-description {
@@ -297,54 +296,36 @@ em {
     text-shadow: 0 1px rgba(0,0,0,0.2);
 }
 
-.drop-area.irrelevant {
-    left: -207px;
+.stack.active-stack {
+    box-shadow: 0 0px 2px 2px rgb(255, 255, 255);
 }
 
-.drop-area.irrelevant .drop-area-label{
-    border-color: rgb(255, 198, 198);
-}
+.drop-area.irrelevant { left: -207px; }
+.drop-area.irrelevant .drop-area-label{ border-color: rgb(255, 198, 198); }
 .drop-area.irrelevant:hover .drop-area-label,
-.drop-area.irrelevant.active .drop-area-label{
-    color: rgb(255, 223, 223);
-}
+.drop-area.irrelevant.active .drop-area-label{ color: rgb(255, 223, 223); }
+.drop-area.irrelevant:hover,
+.drop-area.irrelevant.active-stack { box-shadow: 0 0px 2px 2px rgb(255, 198, 198); }
 
-.drop-area.maybe-relevant {
-    left: 0;
-}
-
-.drop-area.maybe-relevant .drop-area-label{
-    border-color: rgb(255, 222, 182);
-}
-
+.drop-area.maybe-relevant { left: 0; }
+.drop-area.maybe-relevant .drop-area-label{ border-color: rgb(255, 222, 182); }
 .drop-area.maybe-relevant:hover .drop-area-label,
-.drop-area.maybe-relevant.active .drop-area-label{
-    color: rgb(255, 222, 182);
-}
+.drop-area.maybe-relevant.active .drop-area-label{ color: rgb(255, 222, 182); }
+.drop-area.maybe-relevant:hover,
+.drop-area.maybe-relevant.active-stack { box-shadow: 0 0px 2px 3px rgb(255, 222, 182); }
 
-.drop-area.probably-relevant {
-    left: 207px;
-}
 
-.drop-area.probably-relevant .drop-area-label {
-    border-color: rgb(249, 246, 177);
-}
-
+.drop-area.probably-relevant { left: 207px; }
+.drop-area.probably-relevant .drop-area-label { border-color: rgb(249, 246, 177); }
 .drop-area.probably-relevant:hover .drop-area-label,
-.drop-area.probably-relevant.active .drop-area-label{
-    color: rgb(249, 246, 177);
-}
+.drop-area.probably-relevant.active .drop-area-label{ color: rgb(249, 246, 177); }
+.drop-area.probably-relevant:hover,
+.drop-area.probably-relevant.active-stack { box-shadow: 0 0px 2px 2px rgb(249, 246, 177); }
 
 
-.drop-area.relevant {
-    left: 414px;
-}
-
-.drop-area.relevant .drop-area-label{
-    border-color: rgb(193, 251, 189);
-}
-
+.drop-area.relevant { left: 414px; }
+.drop-area.relevant .drop-area-label{ border-color: rgb(193, 251, 189); }
 .drop-area.relevant:hover .drop-area-label,
-.drop-area.relevant.active .drop-area-label{
-    color: rgb(193, 251, 189);
-}
+.drop-area.relevant.active .drop-area-label{ color: rgb(193, 251, 189); }
+.drop-area.relevant:hover,
+.drop-area.relevant.active-stack { box-shadow: 0 0px 2px 2px rgb(193, 251, 189); }
