@@ -70,7 +70,7 @@ $app->register($relevanceScoringProvider, [
     'search.wikis' => [
         'enwiki' => 'https://en.wikipedia.org/w/api.php',
     ],
-    'search.default_scoring_slots' => [1,1,3,4,5],
+    'search.default_scoring_slots' => [5,5],
 ]);
 $app->mount('/', $relevanceScoringProvider);
 
