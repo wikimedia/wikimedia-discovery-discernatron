@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use WikiMedia\OAuth\User;
 use WikiMedia\RelevanceScoring\Application;
+use WikiMedia\RelevanceScoring\Reliability;
 use WikiMedia\RelevanceScoring\Repository\QueriesRepository;
 use WikiMedia\RelevanceScoring\Repository\ScoresRepository;
 
@@ -23,22 +24,26 @@ class ScoresController
     private $queriesRepo;
     /** @var ScoresRepository */
     private $scoresRepo;
+    /** @var Reliability */
+    private $reliability;
 
     public function __construct(
         Application $app,
         User $user,
         Twig_Environment $twig,
         QueriesRepository $queriesRepo,
-        ScoresRepository $scoresRepo
+        ScoresRepository $scoresRepo,
+        Reliability $reliability
     ) {
         $this->app = $app;
         $this->user = $user;
         $this->twig = $twig;
         $this->queriesRepo = $queriesRepo;
         $this->scoresRepo = $scoresRepo;
+        $this->reliability = $reliability;
     }
 
-    // This is a very sad pagination mechanic, only offering forward pagination. 
+    // This is a very sad pagination mechanic, only offering forward pagination.
     // Better solutions get increasingly more complicated though.
     private function paginate(Request $request, Closure $fn, $defaultLimit = 20)
     {
@@ -93,15 +98,26 @@ class ScoresController
             throw new \Exception('Not Found');
         }
 
-        $scores = $this->scoresRepo->getScoresForQuery($this->user, $id);
+        $scores = $this->scoresRepo->getScoresForQueryAndUser($this->user, $id);
         if (!$scores) {
             throw new \Exception('No scores available');
         }
         $renderer = $this->getRenderer($request, 'query_scores.twig');
 
+        if ($this->reliability->countScores($id) >= 2) {
+            list($acceptable, $alpha, $oddOneOut) = $this->reliability->check(
+                $id,
+                Reliability::DEFAULT_THRESHOLD
+            );
+            $alpha = round($alpha, 3);
+        } else {
+            $alpha = 'not enough data';
+        }
+
         return $renderer([
             'query' => $maybeQuery->get(),
             'scores' => $scores,
+            'alpha' => $alpha,
         ]);
     }
 

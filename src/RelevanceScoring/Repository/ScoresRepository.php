@@ -37,6 +37,7 @@ class ScoresRepository
             'query_id' => $queryId,
             'score' => $score,
             'created' => time(),
+            'reliable' => 0,
         ];
         $affected = $this->db->insert('scores', $row);
         if ($affected !== 1) {
@@ -44,6 +45,21 @@ class ScoresRepository
         }
 
         return $this->db->lastInsertId();
+    }
+
+    public function markReliable($queryId, $excludeUserId = null)
+    {
+        $qb = $this->db->createQueryBuilder()
+            ->update('scores', 's')
+            ->set('reliable', 1)
+            ->where('query_id = :queryId')
+            ->setParameter('queryId', $queryId);
+
+        if ($excludeUserId !== null) {
+            $qb->andWhere('user_id <> :userId')
+                ->setParameter('userId', $excludeUserId);
+        }
+        $qb->execute();
     }
 
     public function getNumberOfScores(array $queryIds)
@@ -101,6 +117,37 @@ EOD;
     }
 
     /**
+     * @param int $queryId The query to collect scores for.
+     *
+     * @return array Multi-dimensional array indexed first by the user id of
+     *               the grader, next by the result id that was graded, with their grade as
+     *               the value.
+     *
+     * @throws RuntimeException
+     */
+    public function getRawScoresForQuery($queryId)
+    {
+        $sql = <<<EOD
+SELECT user_id, result_id, score
+  FROM scores
+ WHERE query_id = :queryId
+EOD;
+        $res = $this->db->fetchAll($sql, [
+            'queryId' => $queryId,
+        ]);
+        if ($res === false) {
+            throw new RuntimeException('Query Failure');
+        }
+
+        $retval = [];
+        foreach ($res as $row) {
+            $retval[$row['user_id']][$row['result_id']] = $row['score'];
+        }
+
+        return $retval;
+    }
+
+    /**
      * @param User $user
      * @param int  $queryId
      *
@@ -108,7 +155,7 @@ EOD;
      *
      * @throws RuntimeException
      */
-    public function getScoresForQuery(User $user, $queryId)
+    public function getScoresForQueryAndUser(User $user, $queryId)
     {
         $sql = <<<EOD
 SELECT r.title,
@@ -153,6 +200,20 @@ EOD;
                 $this->storeQueryScore($user, $queryId, $resultId, $score);
             }
         });
+    }
+
+    public function getListOfScoredQueries()
+    {
+        $sql = <<<EOD
+SELECT queries.id, queries.query, x.count
+  FROM queries
+  JOIN (SELECT query_id, count(distinct user_id) as count
+          FROM scores
+         GROUP BY query_id
+       ) x ON x.query_id = queries.id
+EOD;
+
+        return $this->db->fetchAll($sql);
     }
 
     /**

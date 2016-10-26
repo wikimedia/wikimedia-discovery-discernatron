@@ -33,10 +33,13 @@ class KrippendorffAlpha
      * bypasses the coincidence matrices. But I couldn't get that to work quite
      * right...so we have this more complicated form.
      */
-    private static function calculate(array $data, $min, $max, $metric)
+    private static function calculate(array $rawData, $min, $max, $metric)
     {
         // It is assumed $data is already in the form of the 'reliability data matrix'
         // from C1. Missing data is represented by nulls.
+
+        // Make sure everything is just 0-indexed lists
+        $data = array_values(array_map('array_values', $rawData));
 
         // Number of observers valuing a unit
         $Mu = array_pad([], count($data[0]), 0);
@@ -111,6 +114,10 @@ class KrippendorffAlpha
             for ($k = $c + 1; $k <= $max; ++$k) {
                 $De += $Nc[$c] * $Nc[$k] * pow($metric($c, $k, $Nc), 2);
             }
+        }
+
+        if ($De === 0) {
+            throw new \RuntimeException('Division by zero');
         }
 
         return 1 - ($N - 1) * $Do / $De;

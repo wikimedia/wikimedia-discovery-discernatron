@@ -42,13 +42,14 @@ CREATE TABLE IF NOT EXISTS `results_sources` (
     UNIQUE KEY `results_source_results_id_source` (`results_id`, `source`),
     KEY `results_sources_snippet_order` (`query_id`, `results_id`, `snippet_score`)
 ) CHARSET=utf8mb4;
-CREATE TABLE IF NOT EXISTS scores (
+CREATE TABLE IF NOT EXISTS `scores` (
     id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id INTEGER UNSIGNED NOT NULL,
     result_id INTEGER UNSIGNED NOT NULL,
     query_id INTEGER UNSIGNED NOT NULL,
     score TINYINT UNSIGNED,
     created INTEGER UNSIGNED NOT NULL,
+    reliable TINYINT UNSIGNED NOT NULL,
     FOREIGN KEY `scores_user_id` (user_id) REFERENCES users(id),
     FOREIGN KEY `scores_result_id` (result_id) REFERENCES results(id),
     FOREIGN KEY `scores_query_id` (query_id) REFERENCES queries(id),

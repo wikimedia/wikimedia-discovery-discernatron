@@ -72,16 +72,19 @@ EOD;
     /**
      * Mark a queryId as needing to be scored $numSlots times.
      *
-     * @param int $queryId
+     * @param int        $queryId
+     * @param int[]|null $slots   The list of scoring priorities to
+     *                            insert into the queue, or null to use
+     *                            defaults from constructor.
      */
-    public function insert($queryId)
+    public function insert($queryId, array $slots = null)
     {
         $params = ['queryId' => $queryId];
         $rows = [];
-        // very simple priority assignment from 1 to $numSlots. Note
-        // that 0 is the highest priority, and we create two items with
-        // priority 1.
-        foreach ($this->defaultSlots as $priority) {
+        if ($slots === null) {
+            $slots = $this->defaultSlots;
+        }
+        foreach ($slots as $priority) {
             $rows[] = "(:queryId, :priority$priority)";
             $params["priority$priority"] = $priority;
         }

@@ -6,6 +6,7 @@ use Silex\ControllerCollection;
 use Silex\ControllerProviderInterface;
 use Silex\ServiceProviderInterface;
 use WikiMedia\RelevanceScoring\Console\CacheClear;
+use WikiMedia\RelevanceScoring\Console\BackfillReliability;
 use WikiMedia\RelevanceScoring\Console\Import;
 use WikiMedia\RelevanceScoring\Console\ImportPending;
 use WikiMedia\RelevanceScoring\Console\PurgeQuery;
@@ -202,6 +203,13 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
 
     private function registerConsole(Application $app)
     {
+        $app['search.console.backfill-reliability'] = function () use ($app) {
+            return new BackfillReliability(
+                $app['search.repository.scores'],
+                $app['search.reliability'],
+                $app['search.queries_manager']
+            );
+        };
         $app['search.console.cache-clear'] = function () use ($app) {
             return new CacheClear($app['twig']);
         };
@@ -235,6 +243,7 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
         };
 
         $app['search.console'] = [
+            'search.console.backfill-reliability',
             'search.console.cache-clear',
             'search.console.import',
             'search.console.importPending',
@@ -245,7 +254,14 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
 
     private function registerControllers(Application $app)
     {
-        // helper for queries controller
+        // helpers for queries controller
+        $app['search.reliability'] = function () use ($app) {
+            return new Reliability(
+                $app['search.repository.scores']
+            );
+        };
+        $app['search.queries_manager.max_scores_per_query'] = 4;
+        $app['search.queries_manager.queue_priority'] = 3;
         $app['search.queries_manager'] = function () use ($app) {
             return new QueriesManager(
                 $app['session']->get('user'),
@@ -253,7 +269,10 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                 $app['search.repository.results'],
                 $app['search.repository.scores'],
                 $app['search.repository.scoring_queue'],
-                $app['search.repository.users']
+                $app['search.repository.users'],
+                $app['search.reliability'],
+                $app['search.queries_manager.max_scores_per_query'],
+                $app['search.queries_manager.queue_priority']
             );
         };
         $app['search.controller.queries'] = function () use ($app) {
@@ -272,7 +291,8 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
                 $app['session']->get('user'),
                 $app['twig'],
                 $app['search.repository.queries'],
-                $app['search.repository.scores']
+                $app['search.repository.scores'],
+                $app['search.reliability']
             );
         };
         $app['search.controller.import'] = function () use ($app) {
