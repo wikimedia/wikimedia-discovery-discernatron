@@ -8,11 +8,7 @@ use Twig_Environment;
 use WikiMedia\OAuth\User;
 use WikiMedia\RelevanceScoring\Application;
 use WikiMedia\RelevanceScoring\Assert\MinimumSubmitted;
-use WikiMedia\RelevanceScoring\Repository\QueriesRepository;
-use WikiMedia\RelevanceScoring\Repository\ResultsRepository;
-use WikiMedia\RelevanceScoring\Repository\ScoresRepository;
-use WikiMedia\RelevanceScoring\Repository\ScoringQueueRepository;
-use WikiMedia\RelevanceScoring\Repository\UsersRepository;
+use WikiMedia\RelevanceScoring\QueriesManager;
 
 class QueriesController
 {
@@ -24,14 +20,8 @@ class QueriesController
     private $twig;
     /** @var FormFactory */
     private $formFactory;
-    /** @var QueriesRepository */
-    private $queriesRepo;
-    /** @var ResultsRepository */
-    private $resultsRepo;
-    /** @var ScoresRepository */
-    private $scoresRepo;
-    /** @var UsersRepository */
-    private $userRepo;
+    /** @var QueriesManager */
+    private $queriesManager;
     /** @var string[] */
     private $wikis;
 
@@ -40,22 +30,14 @@ class QueriesController
         User $user,
         Twig_Environment $twig,
         FormFactory $formFactory,
-        QueriesRepository $queriesRepo,
-        ResultsRepository $resultsRepo,
-        ScoresRepository $scoresRepo,
-        ScoringQueueRepository $scoringQueueRepo,
-        UsersRepository $userRepo,
+        QueriesManager $queriesManager,
         array $wikis
     ) {
         $this->app = $app;
         $this->user = $user;
         $this->twig = $twig;
         $this->formFactory = $formFactory;
-        $this->queriesRepo = $queriesRepo;
-        $this->resultsRepo = $resultsRepo;
-        $this->scoresRepo = $scoresRepo;
-        $this->scoringQueueRepo = $scoringQueueRepo;
-        $this->userRepo = $userRepo;
+        $this->queriesManager = $queriesManager;
         $this->wikis = $wikis;
     }
 
@@ -66,7 +48,7 @@ class QueriesController
 
     public function nextQuery(Request $request)
     {
-        $maybeId = $this->scoringQueueRepo->pop($this->user);
+        $maybeId = $this->queriesManager->nextQueryId();
         $params = [];
         if ($request->query->get('saved')) {
             $params['saved'] = 1;
@@ -82,7 +64,7 @@ class QueriesController
 
     public function skipQueryById(Request $request, $queryId)
     {
-        $maybeQuery = $this->queriesRepo->getQuery($queryId);
+        $maybeQuery = $this->queriesManager->getQuery($queryId);
         if ($maybeQuery->isEmpty()) {
             // @todo 404
             throw new \Exception('Query not found');
@@ -95,8 +77,7 @@ class QueriesController
         // look into adding session based notifications to make it easier to
         // tell users about this.
         if ($form->isValid()) {
-            $this->queriesRepo->markQuerySkipped($this->user, $queryId);
-            $this->scoringQueueRepo->unassignUser($this->user);
+            $this->queriesManager->skipQuery($queryId);
         }
 
         return $this->app->redirect($this->app->path('next_query'));
@@ -104,32 +85,27 @@ class QueriesController
 
     public function queryById(Request $request, $queryId)
     {
-        $maybeQuery = $this->queriesRepo->getQuery($queryId);
+        $maybeQuery = $this->queriesManager->getQuery($queryId);
         if ($maybeQuery->isEmpty()) {
             // @todo 404
             throw new \Exception('Query not found');
         }
         $query = $maybeQuery->get();
-        if ( !$query['imported'] ) {
+        if (!$query['imported']) {
             return $this->twig->render('query_not_imported.twig', [
                 'query' => $query,
             ]);
         }
 
-        $maybeResults = $this->resultsRepo->getQueryResults($queryId);
+        $maybeResults = $this->queriesManager->getQueryResults($queryId);
         if ($maybeResults->isEmpty()) {
             throw new \Exception('No results found for query');
         }
 
-        $results = $this->shufflePreserveKeys(
-            $maybeResults->get(),
-            // user id is used to give each user a different order,
-            // but the same user gets same order each time.
-            $this->user->uid
-        );
         // When encoded to json we will lose the ordering, so
         // add a key to identify the order
         $position = 0;
+        $results = $maybeResults->get();
         foreach (array_keys($results) as $id) {
             $results[$id]['order'] = $position++;
         }
@@ -138,8 +114,7 @@ class QueriesController
         $form->handleRequest($request);
 
         if ($form->isValid() && !$request->request->has('cards')) {
-            $this->scoresRepo->storeQueryScores($this->user, $queryId, $form->getData());
-            $this->scoringQueueRepo->markScored($this->user, $queryId);
+            $this->queriesManager->saveScores($queryId, $form->getData());
 
             return $this->app->redirect($this->app->path('next_query', ['saved' => 1]));
         }
@@ -207,52 +182,10 @@ class QueriesController
         return $builder->getForm();
     }
 
-    /**
-     * PHP's shuffle function loses the keys. So sort the keys
-     * and make a new array based on the order of sorted keys.
-     * Additionally php's shuffle is automatically seeded so we
-     * can't get the same order across requests. Fix that by using
-     * a local fisher yates implementation.
-     *
-     * @param array $array
-     *
-     * @return array
-     */
-    private function shufflePreserveKeys(array $array, $seed)
-    {
-        $keys = $this->fisherYatesShuffle(array_keys($array), $seed);
-        $result = array();
-        foreach ($keys as $key) {
-            $result[$key] = $array[$key];
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param array $array Must be numerically indexed starting
-     *                     from 0 with no gaps.
-     * @param int   $seed
-     *
-     * @return array
-     */
-    private function fisherYatesShuffle(array $array, $seed)
-    {
-        mt_srand($seed);
-        for ($i = count($array) - 1; $i > 0; --$i) {
-            $j = mt_rand(0, $i);
-            $tmp = $array[$i];
-            $array[$i] = $array[$j];
-            $array[$j] = $tmp;
-        }
-
-        return $array;
-    }
-
     private function chooseScoringTemplate(Request $request)
     {
         $fromQuery = $request->query->get('cards', null);
-        if ( $fromQuery === null ) {
+        if ($fromQuery === null) {
             $fromQuery = $request->request->get('cards', null);
         }
 
@@ -263,7 +196,7 @@ class QueriesController
                 : 'classic';
             if ($interface !== $this->user->extra['scoringInterface']) {
                 $this->user->extra['scoringInterface'] = $interface;
-                $this->userRepo->updateUser($this->user);
+                $this->queriesManager->updateUserStorage();
             }
         }
 

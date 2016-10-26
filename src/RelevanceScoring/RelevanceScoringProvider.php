@@ -245,17 +245,24 @@ class RelevanceScoringProvider implements ControllerProviderInterface, ServicePr
 
     private function registerControllers(Application $app)
     {
+        // helper for queries controller
+        $app['search.queries_manager'] = function () use ($app) {
+            return new QueriesManager(
+                $app['session']->get('user'),
+                $app['search.repository.queries'],
+                $app['search.repository.results'],
+                $app['search.repository.scores'],
+                $app['search.repository.scoring_queue'],
+                $app['search.repository.users']
+            );
+        };
         $app['search.controller.queries'] = function () use ($app) {
             return new QueriesController(
                 $app,
                 $app['session']->get('user'),
                 $app['twig'],
                 $app['form.factory'],
-                $app['search.repository.queries'],
-                $app['search.repository.results'],
-                $app['search.repository.scores'],
-                $app['search.repository.scoring_queue'],
-                $app['search.repository.users'],
+                $app['search.queries_manager'],
                 $app['search.wikis']
             );
         };
