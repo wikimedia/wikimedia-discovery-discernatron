@@ -27,7 +27,7 @@ class QueriesManager
      */
     const RELIABILITY_BAD = 'bad';
 
-    /** @var User */
+    /** @var User|null */
     private $user;
     /** @var ResultsRepository */
     private $resultsRepository;
@@ -47,7 +47,7 @@ class QueriesManager
     private $queuePriority;
 
     /**
-     * @param User                   $user
+     * @param User|null              $user
      * @param QueriesRepository      $queriesRepo
      * @param ResultsRepository      $resultsRepo
      * @param ScoresRepository       $scoresRepo
@@ -58,7 +58,7 @@ class QueriesManager
      * @param int                    $queuePriority
      */
     public function __construct(
-        User $user,
+        User $user = null,
         QueriesRepository $queriesRepo,
         ResultsRepository $resultsRepo,
         ScoresRepository $scoresRepo,
@@ -81,6 +81,9 @@ class QueriesManager
 
     public function nextQueryId()
     {
+        if ( $this->user === null ) {
+            throw new \RuntimeException( 'No user available' );
+        }
         return $this->scoringQueueRepo->pop($this->user);
     }
 
@@ -91,6 +94,9 @@ class QueriesManager
 
     public function getQueryResults($queryId)
     {
+        if ( $this->user === null ) {
+            throw new \RuntimeException( 'No user available' );
+        }
         $maybeResults = $this->resultsRepo->getQueryResults($queryId);
         if ($maybeResults->isEmpty()) {
             return $maybeResults;
@@ -106,12 +112,18 @@ class QueriesManager
 
     public function skipQuery($queryId)
     {
+        if ( $this->user === null ) {
+            throw new \RuntimeException( 'No user available' );
+        }
         $this->queriesRepo->markQuerySkipped($this->user, $queryId);
         $this->scoringQueueRepo->unassignUser($this->user);
     }
 
     public function saveScores($queryId, array $scores)
     {
+        if ( $this->user === null ) {
+            throw new \RuntimeException( 'No user available' );
+        }
         $this->scoresRepo->storeQueryScores($this->user, $queryId, $scores);
         $this->scoringQueueRepo->markScored($this->user, $queryId);
         $this->updateReliability($queryId);
@@ -119,6 +131,9 @@ class QueriesManager
 
     public function updateUserStorage()
     {
+        if ( $this->user === null ) {
+            throw new \RuntimeException( 'No user available' );
+        }
         $this->userRepo->updateUser($this->user);
     }
     /**
