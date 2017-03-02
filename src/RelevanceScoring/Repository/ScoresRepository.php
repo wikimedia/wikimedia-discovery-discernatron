@@ -161,7 +161,8 @@ EOD;
 SELECT r.title,
 	   AVG(s.score) as score,
        u_s.score as user_score,
-       SUM(IF(s.score IS NULL, 0, 1)) as num_scores
+       SUM(IF(s.score IS NULL, 0, 1)) as num_scores,
+        s.reliable
   FROM ( SELECT r.id, r.title
            FROM results r
            JOIN results_sources r_s ON r.id = r_s.results_id
