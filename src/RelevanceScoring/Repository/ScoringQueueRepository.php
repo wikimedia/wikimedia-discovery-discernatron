@@ -3,9 +3,9 @@
 namespace WikiMedia\RelevanceScoring\Repository;
 
 use Doctrine\DBAL\Connection;
-use PlasmaConduit\option\None;
-use PlasmaConduit\option\Option;
-use PlasmaConduit\option\Some;
+use PhpOption\None;
+use PhpOption\Option;
+use PhpOption\Some;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
 use WikiMedia\OAuth\User;
@@ -119,7 +119,7 @@ EOD;
                 $this->assign($row['id'], $user);
                 $res = new Some($row['query_id']);
             } else {
-                $res = new None();
+                $res = None::create();
             }
         });
 

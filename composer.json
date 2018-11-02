@@ -19,7 +19,7 @@
         "firebase/php-jwt": "^3.0",
         "kevinrob/guzzle-cache-middleware": "^1.1",
         "knplabs/console-service-provider": "^1.1",
-        "plasmaconduit/option": "^0.2.1",
+        "phpoption/phpoption": "^1.5.0",
         "silex/web-profiler": "^1.0",
         "sorien/silex-dbal-profiler": "~1.1"
     },

@@ -3,9 +3,9 @@
 namespace WikiMedia\RelevanceScoring\Repository;
 
 use Doctrine\DBAL\Connection;
-use PlasmaConduit\option\None;
-use PlasmaConduit\option\Option;
-use PlasmaConduit\option\Some;
+use PhpOption\None;
+use PhpOption\Option;
+use PhpOption\Some;
 use WikiMedia\OAuth\User;
 
 class UsersRepository
@@ -67,7 +67,7 @@ class UsersRepository
         $sql = "SELECT id, name, edit_count, scoring_interface FROM users WHERE $condition";
         $row = $this->db->fetchAssoc($sql, $values);
         if (!$row) {
-            return new None();
+            return None::create();
         }
 
         $user = new User();

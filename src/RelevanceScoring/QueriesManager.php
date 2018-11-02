@@ -2,7 +2,7 @@
 
 namespace WikiMedia\RelevanceScoring;
 
-use PlasmaConduit\option\Some;
+use PhpOption\Some;
 use WikiMedia\OAuth\User;
 use WikiMedia\RelevanceScoring\Repository\ResultsRepository;
 use WikiMedia\RelevanceScoring\Repository\ScoresRepository;

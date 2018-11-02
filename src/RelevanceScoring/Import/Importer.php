@@ -62,7 +62,7 @@ class Importer
 
         $maybeQueryId = $this->queriesRepo->findQueryId($wiki, $queryString);
         $queryId = null;
-        if ($maybeQueryId->nonEmpty()) {
+        if ($maybeQueryId->isDefined()) {
             $queryId = $maybeQueryId->get();
             $maybeQuery = $this->queriesRepo->getQuery($queryId);
             if ($maybeQuery->isEmpty()) {

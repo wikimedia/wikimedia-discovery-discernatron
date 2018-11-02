@@ -5,9 +5,9 @@ namespace WikiMedia\RelevanceScoring\Repository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use PDO;
-use PlasmaConduit\option\None;
-use PlasmaConduit\option\Option;
-use PlasmaConduit\option\Some;
+use PhpOption\None;
+use PhpOption\Option;
+use PhpOption\Some;
 use WikiMedia\OAuth\User;
 use WikiMedia\RelevanceScoring\Exception\DuplicateQueryException;
 use WikiMedia\RelevanceScoring\Exception\RuntimeException;
@@ -41,7 +41,7 @@ class QueriesRepository
 
         $maxId = $qb->execute()->fetchColumn();
         if ($maxId === false) {
-            return new None();
+            return None::create();
         }
 
         $rand = mt_rand(0, $maxId);
@@ -92,7 +92,7 @@ class QueriesRepository
             $id = $qb->execute()->fetchColumn();
 
             if ($id === false) {
-                return new None();
+                return None::create();
             }
         }
 
@@ -115,7 +115,7 @@ class QueriesRepository
         if ($result) {
             return new Some($result);
         } else {
-            return new None();
+            return None::create();
         }
     }
 
@@ -185,7 +185,7 @@ class QueriesRepository
         if ($result) {
             return new Some(reset($result));
         } else {
-            return new None();
+            return None::create();
         }
     }
 

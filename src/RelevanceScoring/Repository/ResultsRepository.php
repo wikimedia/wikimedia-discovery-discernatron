@@ -3,9 +3,9 @@
 namespace WikiMedia\RelevanceScoring\Repository;
 
 use Doctrine\DBAL\Connection;
-use PlasmaConduit\option\None;
-use PlasmaConduit\option\Option;
-use PlasmaConduit\option\Some;
+use PhpOption\None;
+use PhpOption\Option;
+use PhpOption\Some;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
 use WikiMedia\OAuth\User;
@@ -51,7 +51,7 @@ class ResultsRepository
 
         $maxId = $qb->execute()->fetchColumn();
         if ($maxId === false) {
-            return new None();
+            return None::create();
         }
 
         $rand = mt_rand(0, $maxId);
@@ -69,7 +69,7 @@ EOD;
             $sql = str_replace('>', '<=', $sql);
             $id = $this->db->fetchColumn($sql, [$user->uid, $rand]);
             if ($id === false) {
-                return new None();
+                return None::create();
             }
         }
 
@@ -105,7 +105,7 @@ SELECT wiki, query, query_id, namespace, title
 EOD;
         $result = $this->db->fetchAssoc($sql, [$resultId]);
         if ($result === false) {
-            return new None();
+            return None::create();
         }
 
         return new Some($result);
@@ -142,7 +142,7 @@ EOD;
             'maxPosition' => $this->maxPosition,
         ]);
         if ($results === false) {
-            return new None();
+            return None::create();
         }
 
         $titles = [];
