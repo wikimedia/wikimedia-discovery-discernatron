@@ -134,7 +134,7 @@ class QueriesManager
         if ( $this->user === null ) {
             throw new \RuntimeException( 'No user available' );
         }
-        $this->userRepo->updateUser($this->user);
+        $this->usersRepo->updateUser($this->user);
     }
     /**
      * PHP's shuffle function loses the keys. So sort the keys
